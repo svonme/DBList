@@ -1,0 +1,25 @@
+{
+  "name": "@fengqiaogang/dblist",
+  "version": "0.1.1",
+  "description": "Operate on a set of regular list data",
+  "main": "src/index.js",
+  "scripts": {
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/svonme/DBList.git"
+  },
+  "keywords": [
+    "db",
+    "list"
+  ],
+  "author": "svon.me@gmail.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/svonme/DBList/issues"
+  },
+  "homepage": "https://github.com/svonme/DBList#readme",
+  "dependencies": {
+    "lodash": "^4.17.15"
+  }
+}
