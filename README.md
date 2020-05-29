@@ -5,44 +5,42 @@
 `$ npm install @fengqiaogang/dblist`
 
 ```
-const list = [
-	{
-		name: '张三',
-		age: 20,
-		sex: '男',
-		hobby: ['上网', '玩游戏']
-	}, 	{
-		name: '张六',
-		age: 20,
-		sex: '男',
-		hobby: ['上网', '玩游戏']
-	}, 	{
-		name: '李四',
-		age: 20,
-		sex: '男',
-		hobby: ['上网', '唱歌']
-	}, 	{
-		name: '王五',
-		age: 20,
-		sex: '男',
-		hobby: ['上网', '玩游戏']
-	}, 	{
-		name: '静静',
-		age: 18,
-		sex: '女',
-		hobby: ['游泳', '唱歌']
-	}, 	{
-		name: '夏琪',
-		age: 19,
-		sex: '女',
-		hobby: ['游泳', '跳舞']
-	}, 	{
-		name: '游勇',
-		age: 22,
-		sex: '男',
-		hobby: ['下棋', '玩游戏']
-	}
-]
+const list = [{
+  name: '张三',
+  age: 20,
+  sex: '男',
+  hobby: ['上网', '玩游戏']
+}, {
+  name: '张六',
+  age: 20,
+  sex: '男',
+  hobby: ['上网', '玩游戏']
+}, {
+  name: '李四',
+  age: 20,
+  sex: '男',
+  hobby: ['上网', '唱歌']
+}, {
+  name: '王五',
+  age: 20,
+  sex: '男',
+  hobby: ['上网', '玩游戏']
+}, {
+  name: '静静',
+  age: 18,
+  sex: '女',
+  hobby: ['游泳', '唱歌']
+}, {
+  name: '夏琪',
+  age: 19,
+  sex: '女',
+  hobby: ['游泳', '跳舞']
+}, {
+  name: '游勇',
+  age: 22,
+  sex: '男',
+  hobby: ['下棋', '玩游戏']
+}]
 ```
 
 
@@ -86,7 +84,7 @@ db.select({ age: [19, 20] });
 db.select({ age: 19, hobby: '玩游戏' });
 
 [
-	{ name: '张六', age: 19, sex: '男', hobby: [ '上网', '玩游戏' ] }
+  { name: '张六', age: 19, sex: '男', hobby: [ '上网', '玩游戏' ] }
 ]
 ```
 
@@ -149,12 +147,12 @@ const list = [
       {
         id: 2,
         value: '朝阳区',
-		    children: [
-				{
-					id: 4,
-					value: '三里屯'
-				}
-			]
+        children: [
+          {
+            id: 4,
+            value: '三里屯'
+          }
+        ]
       },
       {
         id: 3,
@@ -204,11 +202,11 @@ const where = { id: 1 }
 db.children(where)
 
 [
-	[
-		{ id: 1, value: '北京' },
-		{ id: 2, value: '朝阳区' },
-		{ id: 3, value: '东城区' }
-	]
+  [
+    { id: 1, value: '北京' },
+    { id: 2, value: '朝阳区' },
+    { id: 3, value: '东城区' }
+  ]
 ]
 ```
 
@@ -221,10 +219,10 @@ const where = { id: 2 }
 db.parent(where)
 
 [
-	[
-		{ id: 2, value: '朝阳区' },
-		{ id: 1, value: '北京' }
-	]
+  [
+    { id: 2, value: '朝阳区' },
+    { id: 1, value: '北京' }
+  ]
 ]
 ```
 
@@ -237,12 +235,12 @@ const where = { id: 1 }
 db.children(where)
 
 [
-	[
-		{ id: 1, value: '北京' },
-		{ id: 2, value: '朝阳区' },
-		{ id: 3, value: '东城区' },
-		{ id: 4, value: '三里屯' }
-	]
+  [
+    { id: 1, value: '北京' },
+    { id: 2, value: '朝阳区' },
+    { id: 3, value: '东城区' },
+    { id: 4, value: '三里屯' }
+  ]
 ]
 ```
 
@@ -255,11 +253,11 @@ const where = { id: 4 }
 db.parent(where)
 
 [
-	[
-		{ id: 4, value: '三里屯' }
-		{ id: 2, value: '朝阳区' },
-		{ id: 1, value: '北京' }
-	]
+  [
+    { id: 4, value: '三里屯' }
+    { id: 2, value: '朝阳区' },
+    { id: 1, value: '北京' }
+  ]
 ]
 ```
 
@@ -289,7 +287,7 @@ const where = { value: '北' }
 db.link(where)
 
 [
-	{ id: 1, value: '北京' }
+  { id: 1, value: '北京' }
 ]
 ```
 
@@ -310,6 +308,6 @@ const where = { id: 5 }
 
 db.select(where, 1)
 [
-	{ id: 5, value: '重庆' }
+  { id: 5, value: '重庆' }
 ]
 ```
