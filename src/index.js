@@ -280,20 +280,28 @@ class DB extends Basis {
 
     const data = [];
 
-    function deep(array) {
+    const deep = (array, foreignKey = 0) => {
       for (let i = 0, len = array.length; i < len; i++) {
         const item = array[i];
-
+        // 判断主键是否存在
+        if (!item[this.primaryKey]) {
+          item[this.primaryKey] = _.uniqueId('item_');
+        }
+        const primaryKey = item[this.primaryKey];
+        // 判断外键是否存在
+        if (!item[this.foreignKey]) {
+          item[this.foreignKey] = foreignKey;
+        }
         const value = _.omit(item, [childrenKey]);
 
         const children = [].concat(item[childrenKey] || []);
         data.push(value);
 
         if (children.length > 0) {
-          deep(children);
+          deep(children, primaryKey);
         }
       }
-    }
+    };
 
     deep(list);
     return data;
@@ -312,41 +320,31 @@ class DB extends Basis {
       const item = itemList[i];
       const childrenWhere = {};
       childrenWhere[this.foreignKey] = item[this.primaryKey];
-      const children = this.selectOne(childrenWhere);
-      const array = _.compact([item, children]);
+      const children = this.select(childrenWhere);
+      const array = _.compact([].concat(item, children));
 
       result.push(array);
     }
     return result;
   }
   childrenDeep(where, limit) {
-    const result = this.children(where, limit);
-
-    const deep = item => {
-      if (item.length > 1) {
-        const last = _.last(item);
-
-        if (last) {
+    const deep = result => {
+      let deepResult = [];
+      _.each(result, list => {
+        const children = list.slice(1);
+        const array = [].concat(list.slice(0, 1));
+        for(let i = 0, len = children.length; i < len; i++) {
+          const node = children[i];
           const childrenWhere = {};
-          childrenWhere[this.foreignKey] = last[this.primaryKey];
-          const data = this.children(childrenWhere, 1);
-
-          if (data.length > 0) {
-            const array = [].concat(item, _.flatten(data));
-            return deep(array);
-          }
+          childrenWhere[this.primaryKey] = node[this.primaryKey];
+          const temp = deep(this.children(childrenWhere));
+          array.push(...temp);
         }
-      }
-
-      return _.compact(item);
+        deepResult.push(...array);
+      });
+      return deepResult;
     };
-
-    for (let i = 0, len = result.length; i < len; i++) {
-      const item = result[i];
-      result[i] = deep(item);
-    }
-
-    return result;
+    return deep(this.children(where, limit));
   }
   parent(where, limit = 0) {
     if (!this.primaryKey || !this.foreignKey) {
@@ -384,7 +382,7 @@ class DB extends Basis {
         if (last) {
           const parenWhere = {};
           parenWhere[this.primaryKey] = last[this.foreignKey];
-          const data = this.parent(parenWhere, 1);
+          const data = this.parent(parenWhere);
 
           if (data.length > 0) {
             const array = [].concat(item, _.flatten(data));

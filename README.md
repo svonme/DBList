@@ -171,11 +171,14 @@ const db = new DBList('db flatten', [], 'id', 'pid')
 const data = db.flatten(list, 'children')  // children 为数据结构中的递归字段
 
 [
-  { id: 1, value: '北京' },
-  { id: 2, value: '朝阳区' },
-  { id: 4, value: '三里屯' },
-  { id: 3, value: '东城区' }
+  { id: 1, value: '北京', pid: 0 },
+  { id: 2, value: '朝阳区', pid: 1 },
+  { id: 4, value: '三里屯', pid: 2 },
+  { id: 3, value: '东城区', pid: 1 }
 ]
+
+pid 为自动生成的外键关系数据，详情参考下面的介绍
+
 ```
 
 ## 构造参数
