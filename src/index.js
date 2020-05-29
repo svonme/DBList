@@ -1,5 +1,5 @@
 /**
- * @file 操作一组有规则的列表数据
+ * @file 数组查询
  * @author svon.me@gmail.com
  */
 
@@ -53,6 +53,8 @@ class Basis {
         // 如果列表数据存与查询数据集合中其中一个匹配，则证明单次比对成功
         if (_.includes(where[key], data[key])) {
           continue;
+        } else if (_.isArray(data[key]) && _.size(_.intersection(where[key], data[key])) > 0) {
+          continue;
         } else {
           // 假如有一次匹配失败，则此次比较任务失败
           status = false;
@@ -61,8 +63,13 @@ class Basis {
       } else {
         // 假如值的结果不相等，假如key不存在
         if (where[key] !== data[key] || !data.hasOwnProperty(key)) {
-          status = false;
-          break;
+          // 假设 key 值是数组
+          if (_.includes([].concat(data[key]), where[key])) {
+            continue;
+          } else {
+            status = false;
+            break;
+          }
         }
       }
     }
@@ -273,16 +280,9 @@ class DB extends Basis {
 
     const data = [];
 
-    const deep = (array, foreignKey = 0) => {
+    function deep(array) {
       for (let i = 0, len = array.length; i < len; i++) {
         const item = array[i];
-
-        if (!item[this.primaryKey]) {
-          item[this.primaryKey] = _.uniqueId();
-        }
-
-        item[this.foreignKey] = foreignKey;
-        const primaryKey = item[this.primaryKey];
 
         const value = _.omit(item, [childrenKey]);
 
@@ -290,10 +290,10 @@ class DB extends Basis {
         data.push(value);
 
         if (children.length > 0) {
-          deep(children, primaryKey);
+          deep(children);
         }
       }
-    };
+    }
 
     deep(list);
     return data;
@@ -407,3 +407,4 @@ class DB extends Basis {
 }
 
 module.exports = DB;
+exports.default = DB;
