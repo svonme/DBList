@@ -371,8 +371,6 @@ class DB extends Basis {
       _.each(result, list => {
         const parents = list.slice(1);
         const array = [].concat(list.slice(0, 1));
-        console.log(array, parents);
-
         for(let i = 0, len = parents.length; i < len; i++) {
           const node = parents[i];
           const parenWhere = {};
