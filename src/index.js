@@ -350,56 +350,41 @@ class DB extends Basis {
     if (!this.primaryKey || !this.foreignKey) {
       throw new Error('primaryKey & foreignKey cannot be empty');
     }
-
     const itemList = this.select(where);
     const result = new Array();
-
     for (let i = 0, len = itemList.length; i < len; i++) {
       if (i >= limit && limit > 0) {
         break;
       }
-
       const item = itemList[i];
       const parenWhere = {};
       parenWhere[this.primaryKey] = item[this.foreignKey];
-      const parent = this.selectOne(parenWhere);
-
-      const array = _.compact([item, parent]);
-
+      const parent = this.select(parenWhere);
+      const array = _.compact([].concat(item, parent));
       result.push(array);
     }
-
     return result;
   }
-
   parentDeep(where, limit) {
-    const result = this.parent(where, limit);
+    const deep = result => {
+      let deepResult = [];
+      _.each(result, list => {
+        const parents = list.slice(1);
+        const array = [].concat(list.slice(0, 1));
+        console.log(array, parents);
 
-    const deep = item => {
-      if (item.length > 1) {
-        const last = _.last(item);
-
-        if (last) {
+        for(let i = 0, len = parents.length; i < len; i++) {
+          const node = parents[i];
           const parenWhere = {};
-          parenWhere[this.primaryKey] = last[this.foreignKey];
-          const data = this.parent(parenWhere);
-
-          if (data.length > 0) {
-            const array = [].concat(item, _.flatten(data));
-            return deep(array);
-          }
+          parenWhere[this.primaryKey] = node[this.primaryKey];
+          const temp = deep(this.parent(parenWhere));
+          array.push(...temp);
         }
-      }
-
-      return _.compact(item);
+        deepResult.push(...array);
+      });
+      return deepResult;
     };
-
-    for (let i = 0, len = result.length; i < len; i++) {
-      const item = result[i];
-      result[i] = deep(item);
-    }
-
-    return result;
+    return deep(this.parent(where, limit));
   }
 
 }
