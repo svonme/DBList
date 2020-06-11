@@ -35,7 +35,7 @@ class Basis {
       for (let i = 0; i < length; i++) {
         const key = keys[i];
 
-        if (data.hasOwnProperty(key) && _.includes(where[key], data[key])) {
+        if (data.hasOwnProperty(key) && _.includes(data[key], where[key])) {
           continue;
         } else {
           status = false;
