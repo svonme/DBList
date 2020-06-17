@@ -1,6 +1,6 @@
 {
   "name": "@fengqiaogang/dblist",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Operate on a set of regular list data",
   "main": "src/index.js",
   "types": "src/index.d.ts",

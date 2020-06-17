@@ -8,6 +8,9 @@ const _ = require('lodash');
 const Where = Symbol('where');
 const Matcher = Symbol('matcher');
 const IsMatch = Symbol('isMatch');
+const possibleWhereLimit = Symbol('possibleWhereLimit');
+
+
 
 class Basis {
   constructor(result) {
@@ -34,7 +37,6 @@ class Basis {
     if (like) {
       for (let i = 0; i < length; i++) {
         const key = keys[i];
-
         if (data.hasOwnProperty(key) && _.includes(data[key], where[key])) {
           continue;
         } else {
@@ -42,7 +44,6 @@ class Basis {
           break;
         }
       }
-
       return status;
     }
 
@@ -242,6 +243,26 @@ class DB extends Basis {
     this.primaryKey = primaryKey;
     this.foreignKey = foreignKey;
   }
+  /**
+   * 断言查询条件能返回的数据长度
+   */
+  [possibleWhereLimit](where) {
+    let limit = void 0;
+    const keys = _.keys(where);
+    if (keys.length === 1) {
+      const [ key ] = keys;
+      if (key === this.primaryKey && _.isString(where[key])) {
+        limit = 1;
+      }
+    }
+    return limit;
+  }
+  select(where, limit) {
+    if (_.isNull(limit) || _.isUndefined(limit)) {
+      limit = this[possibleWhereLimit](where);
+    }
+    return this[Where](where, limit, this.data, false);
+  }
 
   setName(name) {
     this.name = name;
@@ -310,7 +331,7 @@ class DB extends Basis {
     if (!this.primaryKey || !this.foreignKey) {
       throw new Error('primaryKey & foreignKey cannot be empty');
     }
-    const itemList = this.select(where);
+    const itemList = this.select(where, this[possibleWhereLimit](where));
     const result = new Array();
     for (let i = 0, len = itemList.length; i < len; i++) {
       if (i >= limit && limit > 0) {
@@ -350,7 +371,7 @@ class DB extends Basis {
     if (!this.primaryKey || !this.foreignKey) {
       throw new Error('primaryKey & foreignKey cannot be empty');
     }
-    const itemList = this.select(where);
+    const itemList = this.select(where, this[possibleWhereLimit](where));
     const result = new Array();
     for (let i = 0, len = itemList.length; i < len; i++) {
       if (i >= limit && limit > 0) {
