@@ -2,9 +2,10 @@
   "name": "@fengqiaogang/dblist",
   "version": "0.1.5",
   "description": "Operate on a set of regular list data",
-  "main": "src/index.js",
-  "types": "src/index.d.ts",
+  "main": "build/index.js",
+  "types": "types/index.d.ts",
   "scripts": {
+    "build": "tsc && uglifyjs build/index.js --comments -o build/index.min.js"
   },
   "repository": {
     "type": "git",
@@ -22,5 +23,10 @@
   "homepage": "https://github.com/svonme/DBList#readme",
   "dependencies": {
     "lodash": "^4.17.15"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.155",
+    "@types/node": "^14.0.13",
+    "uglify-js": "^3.9.4"
   }
 }

@@ -81,25 +81,25 @@ declare class DB extends Basis {
    * @param where 查询条件
    * @param limit 指定查询条数
    */
-  children<T>(where: Where, limit: number) : T[][]
+  children<T>(where: Where) : T[]
   /**
    * 查询所有子级数据，相对 children 方法，该方法会进行递归查询
    * @param where 
    * @param limit 
    */
-  childrenDeep<T>(where: Where, limit: number): T[][]
+  childrenDeep<T>(where: Where): T[]
   /**
    * 查询父级数据，与 children 方法进行相反方向查询
    * @param where 
    * @param limit 
    */
-  parent<T>(where: Where, limit: number): T[][]
+  parent<T>(where: Where): T[]
   /**
    * 查询所有父级数据，与 与 childrenDeep 方法进行相反方向查询
    * @param where 
    * @param limit 
    */
-  parentDeep<T>(where: Where, limit?: number): T[][]
+  parentDeep<T>(where: Where, limit?: number): T[]
 }
 
 export = DB;
