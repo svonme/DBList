@@ -10,12 +10,40 @@ interface DataItem {
 };
 
 interface Where extends DataItem{
-}; 
+};
+
+let _UUIDIndex = 1;
+function UUid() {
+  const id = `DBList_${_UUIDIndex++}`;
+  const key = String(Math.random()).slice(2);
+  return `${id}_${key}`;
+}
+
 
 class Basis {
-  public data: Array<DataItem>;
-  constructor(list: Array<DataItem>) {
-    this.data = [].concat(list || []);
+  protected data: Map<string | number, Map<string | number, DataItem>>;
+  /** 主健 */
+  protected primaryKey: string;
+  /** 外健 */
+  protected foreignKey: string;
+  /** 第一层外键值 */
+  protected foreignKeyValue: string | number;
+  private unknownKey: string;
+  constructor(list: Array<DataItem>, primaryKey: string, foreignKey: string, foreignKeyValue: string) {
+    this.data = new Map();
+    this.primaryKey = primaryKey;
+    this.foreignKey = foreignKey;
+    this.foreignKeyValue = foreignKeyValue;
+    this.unknownKey = `_unknownKey_${UUid()}`;
+    this.data.set(this.unknownKey, new Map());
+    this.insert(list);
+  }
+  size() {
+    let number = 0;
+    this.data.forEach(map => {
+      number += map.size;
+    })
+    return number;
   }
   /**
    * 模糊匹配查询
@@ -95,6 +123,19 @@ class Basis {
     };
   }
   /**
+   * 查询所有
+   * @param limit 
+   */
+  private whereAll(limit: number = 0): Array<DataItem> {
+    const result: Array<DataItem> = [];
+    this.data.forEach(map => {
+      map.forEach(item => {
+        result.push(item);
+      });
+    });
+    return limit > 0 ? result.slice(0, limit) : result;
+  }
+  /**
    * 查询任务
    * @param where 要查询的条件
    * @param limit 限定查询结果条数
@@ -102,25 +143,84 @@ class Basis {
    * @param like  是否模糊查询
    */
   Where(where: Where = {}, limit: number = 0, like: boolean): Array<DataItem> {
-    const result = [];
-    if (_.keys(where).length === 0) {
-      if (limit > 0) {
-        result.push(...this.data.slice(0, limit));
-      } else {
-        result.push(...this.data);
+    const keys = Object.keys(where);
+    if (keys.length === 0) {
+      return this.whereAll(limit);
+    }
+    let flag = true;
+    let result: Array<DataItem> = [];
+    // 主外键查询
+    if (keys.length === 1 && !like) {
+      // 如果查询条件为第一层数据
+      if (where[this.foreignKey] === this.foreignKeyValue || where[this.primaryKey] === this.foreignKeyValue) {
+        // 按全部数据返回
+        return this.whereAll(0);
       }
-    } else {
-      const match = this.Matcher(where, like);
-      for (let i = 0, len = this.data.length; i < len; i++) {
-        const item = this.data[i];
-        const status = match(item);
+      // 外键查询
+      if (this.foreignKey in where) {
+        const foreignKeys = [].concat(where[this.foreignKey]);
+        for(const key of foreignKeys) {
+          const map = this.data.get(key);
+          if (!map) {
+            continue;
+          }
+          if (limit === 0) {
+            result.push(...map.values());
+          } else {
+            for(const item in map.values()) {
+              result.push(item as any);
+              // 假如查询数据长度达到限制
+              if (result.length >= limit) {
+                flag = false;
+                break;
+              }
+            }
+            if (!flag) {
+              break;
+            }
+          }
+        }
+        return result;
+      }
+      // 主键查询
+      if (this.primaryKey in where) {
+        const primaryKeys = [].concat(where[this.primaryKey]);
+        for(const key of primaryKeys) {
+          for(const map of this.data.values()) {
+            const value = map.get(key);
+            if (value) {
+              result.push(value);
+            }
+            if (limit > 0 && result.length >= limit) {
+              flag = false;
+              break;
+            }
+          }
+          if (!flag) {
+            break;
+          }
+        }
+        return result;
+      }
+    }
+    // 正常查询
+    const match = this.Matcher(where, like);
+    for(const key of this.data.keys()) {
+      const map = this.data.get(key);
+      for(const index of map.keys()) {
+        const item = map.get(index);
+        const status = item ? match(item) : false;
         if (status) {
           result.push(item);
           // 假如查询数据长度达到限制
           if (limit > 0 && result.length >= limit) {
+            flag = false;
             break;
           }
         }
+      }
+      if (!flag) {
+        break;
       }
     }
     return result;
@@ -151,22 +251,102 @@ class Basis {
     }
     const list = [].concat(row);
     for(let i = 0, len = list.length; i < len; i++){
-      this.data.push(list[i])
+      const item = list[i];
+      // 判断是否存在主健
+      if (!(this.primaryKey in item)) {
+        item[this.primaryKey] = UUid();
+      }
+      if (this.foreignKey in item) {
+        for(const pid of [].concat(item[this.foreignKey])) {
+          let map = this.data.get(pid);
+          if (!map) {
+            this.data.set(pid, new Map());
+            map = this.data.get(pid);
+          }
+          map.set(item[this.primaryKey], item);
+        }
+      } else {
+        const map = this.data.get(this.unknownKey);
+        map.set(item[this.primaryKey], item);
+      }
     }
     return list.length;
+  }
+  /**
+   * 修改数据中的主键
+   */
+  private _updatePrimaryKey(originKey: string | number, newKey: string | number) {
+    const foreignKeys = this.data.keys();
+    for(const foreignKey of foreignKeys) {
+      const map = this.data.get(foreignKey);
+      if(map.has(originKey)) {
+        const value = map.get(originKey);
+        map.delete(originKey);
+        map.set(newKey, value);
+      }
+    }
+  }
+  /**
+   * 修改数据中的外键
+   */
+  private _updateforeignKey(originKey: string | number, newKey: string | number) {
+    if (this.data.has(originKey)) {
+      const map = this.data.get(originKey);
+      for(const key of map.keys()) {
+        const value = map.get(key);
+        if (_.isArray(value[this.foreignKey])) {
+          // 合并数据
+          const ids = [].concat(value[this.foreignKey], newKey);
+          // 排除旧数据
+          value[this.foreignKey] = _.difference(ids, [originKey]);
+        } else {
+          value[this.foreignKey] = newKey;
+        }
+        map.set(key, value);
+      }
+      this.data.delete(originKey);
+      this.data.set(newKey, map);
+    }
   }
   /**
    * 修改
    * @param where 需要修改的数据的查询条件
    * @param value 新的数据
-   * @param limit 限制受影响的行数
    */
-  update(where: Where, value: DataItem, limit: number): number {
-    const list = this.select(where, limit);
-    for (let i = 0, len = list.length; i < len; i++) {
-      Object.assign(list[i], value);
+  update(where: Where, value: DataItem): number {
+    const primaryKeyHooks: DataItem = {};
+    const foreignKeyHooks: DataItem = {};
+    // 查询需要修改的数据
+    const originList = this.select(where);
+    for (const origin of originList) {
+      const key = origin[this.primaryKey];
+      // 查询主键是否发生变化
+      if (this.primaryKey in value) {
+        primaryKeyHooks[key] = value[this.primaryKey];
+        foreignKeyHooks[key] = value[this.primaryKey];
+      }
+      // 查询外键是否发生变化
+      if (this.foreignKey in value) {
+        foreignKeyHooks[origin[this.foreignKey]] = value[this.foreignKey];
+      }
+      // 新数据
+      for(const map of this.data.values()) {
+        if(map.has(key)) {
+          map.set(key, Object.assign({}, origin, value));
+        }
+      }
     }
-    return list.length;
+    // 修改主键
+    for(const key of Object.keys(primaryKeyHooks)) {
+      const value = primaryKeyHooks[key];
+      this._updatePrimaryKey(key, value);
+    }
+    // 修改外键
+    for(const key of Object.keys(foreignKeyHooks)) {
+      const value = foreignKeyHooks[key];
+      this._updateforeignKey(key, value);
+    }
+    return originList.length;
   }
   /**
    * 删除数据
@@ -176,24 +356,18 @@ class Basis {
     if (_.keys(where).length < 1) {
       return 0;
     }
-    const data = this.data;
-    const match = this.Matcher(where); // 剩余的数据(排除需要删除的数据)
-    const surplus = [];
-    const length = data.length;
-    for (let i = 0; i < length; i++) {
-      const item = data[i];
-      const status = match(item);
-      if (status) {
-        continue;
-      } else {
-        surplus.push(item);
+    let count = 0;
+    const list = this.select(where);
+    for(const item of list) {
+      const id = item[this.primaryKey];
+      for(const map of this.data.values()) {
+        // 删除元素
+        if (map.delete(id)) {
+          count++;
+        }
       }
     }
-    if (surplus.length < length) {
-      this.data = surplus;
-      return length - surplus.length;
-    }
-    return 0;
+    return count;
   }
 }
 
@@ -201,25 +375,15 @@ class Basis {
 
 class DB extends Basis {
   /** DB 名称 */
-  protected name: string;
-  /** 主健 */
-  protected primaryKey: string;
-  /** 外健 */
-  protected foreignKey: string;
-  /** 第一层外键值 */
-  protected foreignKeyValue: string | number;
-  constructor(name: string, list: Array<DataItem> = [], primaryKey?: string, foreignKey?: string, foreignKeyValue?: string) {
-    super(list); // 设置数据库名称
-    const r = Math.random() * 10000;
-    this.setName(name || `table-${parseInt(r as any, 10)}`);
-    this.primaryKey = primaryKey;
-    this.foreignKey = foreignKey;
-    this.foreignKeyValue = foreignKeyValue || '0';
+  private name: string;
+  constructor(name: string = UUid(), list: Array<DataItem> = [], primaryKey: string = 'id', foreignKey: string = 'pid', foreignKeyValue: string = '0') {
+    super(list, primaryKey, foreignKey, foreignKeyValue);
+    // 设置数据库名称
+    this.setName(name);
   }
   protected setName(name: string): void {
     this.name = name;
   }
-
   protected getName(): string {
     return this.name;
   }
@@ -232,38 +396,34 @@ class DB extends Basis {
    * @param callback 可以对每一个元素作处理
    */
   clone(callback: Function): Array<DataItem> {
-    const list: Array<DataItem> = [];
-    for (let i = 0, len = this.data.length; i < len; i++) {
-      const item = Object.assign({}, this.data[i]);
-      if (callback) {
-        const value = callback(item);
+    const array = this.select();
+    if (callback) {
+      const list: Array<DataItem> = [];
+      for (let i = 0, len = array.length; i < len; i++) {
+        const value = callback(Object.assign({}, array[i]));
         if (value) {
           list.push(value);
         }
-      } else {
-        list.push(item);
       }
+      return list;
     }
-    return list;
+    return array;
   }
   /** 以下法必须配置 primaryKey & foreignKey */
   flatten(list: Array<DataItem>, childrenKey: string): Array<DataItem> {
-    if (!this.primaryKey || !this.foreignKey) {
-      throw new Error('primaryKey & foreignKey cannot be empty');
-    }
     const data: Array<DataItem> = [];
     const deep = (array: Array<DataItem>, foreignKey: string | number) => {
       for (let i = 0, len = array.length; i < len; i++) {
         const item = array[i];
         // 判断主键是否存在
-        if (!item[this.primaryKey]) {
-          item[this.primaryKey] = _.uniqueId('item_');
+        if (!(this.primaryKey in item)) {
+          item[this.primaryKey] = UUid();
         }
-        const primaryKey = item[this.primaryKey];
         // 判断外键是否存在
-        if (!item[this.foreignKey]) {
+        if (!(this.foreignKey in item)) {
           item[this.foreignKey] = foreignKey;
         }
+        const primaryKey = item[this.primaryKey];
         const value = _.omit(item, [childrenKey]);
         data.push(value);
         if (item[childrenKey]) {
@@ -283,9 +443,6 @@ class DB extends Basis {
    * @param limit 指定查询条数
    */
   children(where: Where): Array<DataItem> {
-    if (!this.primaryKey || !this.foreignKey) {
-      throw new Error('primaryKey & foreignKey cannot be empty');
-    }
     const item = this.selectOne(where);
     if (item) {
       const childrenWhere: Where = {};
@@ -324,9 +481,6 @@ class DB extends Basis {
    * @param limit 
    */
   parent(where: Where): Array<DataItem> {
-    if (!this.primaryKey || !this.foreignKey) {
-      throw new Error('primaryKey & foreignKey cannot be empty');
-    }
     const result: Array<DataItem> = [];
     const item = this.selectOne(where);
     if (item) {

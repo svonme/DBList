@@ -1,10 +1,11 @@
 {
   "name": "@fengqiaogang/dblist",
-  "version": "0.1.5",
+  "version": "0.2.1-beta",
   "description": "Operate on a set of regular list data",
   "main": "build/index.js",
   "types": "types/index.d.ts",
   "scripts": {
+    "dev": "tsc -w",
     "build": "tsc && uglifyjs build/index.js --comments -o build/index.min.js"
   },
   "repository": {

@@ -1,18 +1,29 @@
 
 let index = 100;
 
-function app(children) {
+function app1() {
   const array = [];
-  for(let i = 1; i <= 2; i++){
+  for(let i = 1; i <= 50; i++){
     array.push({
       id: `${index++}`,
-      name: `${i}`,
-      children: children < 4 ? app(children + 1) : []
+      name: `${i}`
     });
   }
   return array;
 }
 
-const list = app(0);
+function app() {
+  const array = [];
+  for(let i = 1; i <= 50; i++){
+    array.push({
+      id: `${index++}`,
+      name: `${i}`,
+      children: app1()
+    });
+  }
+  return array;
+}
+
+const list = app();
 
 module.exports = list;
