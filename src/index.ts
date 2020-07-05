@@ -151,11 +151,6 @@ class Basis {
     let result: Array<DataItem> = [];
     // 主外键查询
     if (keys.length === 1 && !like) {
-      // 如果查询条件为第一层数据
-      if (where[this.foreignKey] === this.foreignKeyValue || where[this.primaryKey] === this.foreignKeyValue) {
-        // 按全部数据返回
-        return this.whereAll(0);
-      }
       // 外键查询
       if (this.foreignKey in where) {
         const foreignKeys = [].concat(where[this.foreignKey]);

@@ -43,8 +43,6 @@ var __spread = (this && this.__spread) || function () {
     return ar;
 };
 var _ = require('lodash');
-;
-;
 var _UUIDIndex = 1;
 function UUid() {
     var id = "DBList_" + _UUIDIndex++;
@@ -148,9 +146,6 @@ var Basis = (function () {
         var flag = true;
         var result = [];
         if (keys.length === 1 && !like) {
-            if (where[this.foreignKey] === this.foreignKeyValue || where[this.primaryKey] === this.foreignKeyValue) {
-                return this.whereAll(0);
-            }
             if (this.foreignKey in where) {
                 var foreignKeys = [].concat(where[this.foreignKey]);
                 try {
