@@ -162,8 +162,8 @@ class Basis {
           if (limit === 0) {
             result.push(...map.values());
           } else {
-            for(const item in map.values()) {
-              result.push(item as any);
+            for(const item of map.values()) {
+              result.push(item);
               // 假如查询数据长度达到限制
               if (result.length >= limit) {
                 flag = false;
@@ -467,7 +467,12 @@ class DB extends Basis {
         deep(childrenWhere);
       }
     };
-    deep(where);
+
+    for(const item of this.select(where)) {
+      const query: Where = {};
+      query[this.primaryKey] = item[this.primaryKey];
+      deep(query);
+    }
     return result;
   }
   /**
@@ -510,7 +515,11 @@ class DB extends Basis {
         deep(this.parent(select));
       }
     }
-    deep(this.parent(where));
+    for(const item of this.select(where)) {
+      const query: Where = {};
+      query[this.primaryKey] = item[this.primaryKey];
+      deep(this.parent(query));
+    }
     return result;
   }
 }

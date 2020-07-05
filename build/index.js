@@ -136,7 +136,7 @@ var Basis = (function () {
         return limit > 0 ? result.slice(0, limit) : result;
     };
     Basis.prototype.Where = function (where, limit, like) {
-        var e_1, _a, e_2, _b, e_3, _c, e_4, _d, e_5, _e;
+        var e_1, _a, e_2, _b, e_3, _c, e_4, _d, e_5, _e, e_6, _f;
         if (where === void 0) { where = {}; }
         if (limit === void 0) { limit = 0; }
         var keys = Object.keys(where);
@@ -159,12 +159,22 @@ var Basis = (function () {
                             result.push.apply(result, __spread(map.values()));
                         }
                         else {
-                            for (var item in map.values()) {
-                                result.push(item);
-                                if (result.length >= limit) {
-                                    flag = false;
-                                    break;
+                            try {
+                                for (var _g = (e_2 = void 0, __values(map.values())), _h = _g.next(); !_h.done; _h = _g.next()) {
+                                    var item = _h.value;
+                                    result.push(item);
+                                    if (result.length >= limit) {
+                                        flag = false;
+                                        break;
+                                    }
                                 }
+                            }
+                            catch (e_2_1) { e_2 = { error: e_2_1 }; }
+                            finally {
+                                try {
+                                    if (_h && !_h.done && (_b = _g["return"])) _b.call(_g);
+                                }
+                                finally { if (e_2) throw e_2.error; }
                             }
                             if (!flag) {
                                 break;
@@ -187,8 +197,8 @@ var Basis = (function () {
                     for (var primaryKeys_1 = __values(primaryKeys), primaryKeys_1_1 = primaryKeys_1.next(); !primaryKeys_1_1.done; primaryKeys_1_1 = primaryKeys_1.next()) {
                         var key = primaryKeys_1_1.value;
                         try {
-                            for (var _f = (e_3 = void 0, __values(this.data.values())), _g = _f.next(); !_g.done; _g = _f.next()) {
-                                var map = _g.value;
+                            for (var _j = (e_4 = void 0, __values(this.data.values())), _k = _j.next(); !_k.done; _k = _j.next()) {
+                                var map = _k.value;
                                 var value = map.get(key);
                                 if (value) {
                                     result.push(value);
@@ -199,36 +209,36 @@ var Basis = (function () {
                                 }
                             }
                         }
-                        catch (e_3_1) { e_3 = { error: e_3_1 }; }
+                        catch (e_4_1) { e_4 = { error: e_4_1 }; }
                         finally {
                             try {
-                                if (_g && !_g.done && (_c = _f["return"])) _c.call(_f);
+                                if (_k && !_k.done && (_d = _j["return"])) _d.call(_j);
                             }
-                            finally { if (e_3) throw e_3.error; }
+                            finally { if (e_4) throw e_4.error; }
                         }
                         if (!flag) {
                             break;
                         }
                     }
                 }
-                catch (e_2_1) { e_2 = { error: e_2_1 }; }
+                catch (e_3_1) { e_3 = { error: e_3_1 }; }
                 finally {
                     try {
-                        if (primaryKeys_1_1 && !primaryKeys_1_1.done && (_b = primaryKeys_1["return"])) _b.call(primaryKeys_1);
+                        if (primaryKeys_1_1 && !primaryKeys_1_1.done && (_c = primaryKeys_1["return"])) _c.call(primaryKeys_1);
                     }
-                    finally { if (e_2) throw e_2.error; }
+                    finally { if (e_3) throw e_3.error; }
                 }
                 return result;
             }
         }
         var match = this.Matcher(where, like);
         try {
-            for (var _h = __values(this.data.keys()), _j = _h.next(); !_j.done; _j = _h.next()) {
-                var key = _j.value;
+            for (var _l = __values(this.data.keys()), _m = _l.next(); !_m.done; _m = _l.next()) {
+                var key = _m.value;
                 var map = this.data.get(key);
                 try {
-                    for (var _k = (e_5 = void 0, __values(map.keys())), _l = _k.next(); !_l.done; _l = _k.next()) {
-                        var index = _l.value;
+                    for (var _o = (e_6 = void 0, __values(map.keys())), _p = _o.next(); !_p.done; _p = _o.next()) {
+                        var index = _p.value;
                         var item = map.get(index);
                         var status = item ? match(item) : false;
                         if (status) {
@@ -240,24 +250,24 @@ var Basis = (function () {
                         }
                     }
                 }
-                catch (e_5_1) { e_5 = { error: e_5_1 }; }
+                catch (e_6_1) { e_6 = { error: e_6_1 }; }
                 finally {
                     try {
-                        if (_l && !_l.done && (_e = _k["return"])) _e.call(_k);
+                        if (_p && !_p.done && (_f = _o["return"])) _f.call(_o);
                     }
-                    finally { if (e_5) throw e_5.error; }
+                    finally { if (e_6) throw e_6.error; }
                 }
                 if (!flag) {
                     break;
                 }
             }
         }
-        catch (e_4_1) { e_4 = { error: e_4_1 }; }
+        catch (e_5_1) { e_5 = { error: e_5_1 }; }
         finally {
             try {
-                if (_j && !_j.done && (_d = _h["return"])) _d.call(_h);
+                if (_m && !_m.done && (_e = _l["return"])) _e.call(_l);
             }
-            finally { if (e_4) throw e_4.error; }
+            finally { if (e_5) throw e_5.error; }
         }
         return result;
     };
@@ -268,7 +278,7 @@ var Basis = (function () {
         return this.Where(where, limit, false);
     };
     Basis.prototype.insert = function (row) {
-        var e_6, _a;
+        var e_7, _a;
         if (!row) {
             return 0;
         }
@@ -280,7 +290,7 @@ var Basis = (function () {
             }
             if (this.foreignKey in item) {
                 try {
-                    for (var _b = (e_6 = void 0, __values([].concat(item[this.foreignKey]))), _c = _b.next(); !_c.done; _c = _b.next()) {
+                    for (var _b = (e_7 = void 0, __values([].concat(item[this.foreignKey]))), _c = _b.next(); !_c.done; _c = _b.next()) {
                         var pid = _c.value;
                         var map = this.data.get(pid);
                         if (!map) {
@@ -290,12 +300,12 @@ var Basis = (function () {
                         map.set(item[this.primaryKey], item);
                     }
                 }
-                catch (e_6_1) { e_6 = { error: e_6_1 }; }
+                catch (e_7_1) { e_7 = { error: e_7_1 }; }
                 finally {
                     try {
                         if (_c && !_c.done && (_a = _b["return"])) _a.call(_b);
                     }
-                    finally { if (e_6) throw e_6.error; }
+                    finally { if (e_7) throw e_7.error; }
                 }
             }
             else {
@@ -306,7 +316,7 @@ var Basis = (function () {
         return list.length;
     };
     Basis.prototype._updatePrimaryKey = function (originKey, newKey) {
-        var e_7, _a;
+        var e_8, _a;
         var foreignKeys = this.data.keys();
         try {
             for (var foreignKeys_2 = __values(foreignKeys), foreignKeys_2_1 = foreignKeys_2.next(); !foreignKeys_2_1.done; foreignKeys_2_1 = foreignKeys_2.next()) {
@@ -319,16 +329,16 @@ var Basis = (function () {
                 }
             }
         }
-        catch (e_7_1) { e_7 = { error: e_7_1 }; }
+        catch (e_8_1) { e_8 = { error: e_8_1 }; }
         finally {
             try {
                 if (foreignKeys_2_1 && !foreignKeys_2_1.done && (_a = foreignKeys_2["return"])) _a.call(foreignKeys_2);
             }
-            finally { if (e_7) throw e_7.error; }
+            finally { if (e_8) throw e_8.error; }
         }
     };
     Basis.prototype._updateforeignKey = function (originKey, newKey) {
-        var e_8, _a;
+        var e_9, _a;
         if (this.data.has(originKey)) {
             var map = this.data.get(originKey);
             try {
@@ -345,19 +355,19 @@ var Basis = (function () {
                     map.set(key, value);
                 }
             }
-            catch (e_8_1) { e_8 = { error: e_8_1 }; }
+            catch (e_9_1) { e_9 = { error: e_9_1 }; }
             finally {
                 try {
                     if (_c && !_c.done && (_a = _b["return"])) _a.call(_b);
                 }
-                finally { if (e_8) throw e_8.error; }
+                finally { if (e_9) throw e_9.error; }
             }
             this.data["delete"](originKey);
             this.data.set(newKey, map);
         }
     };
     Basis.prototype.update = function (where, value) {
-        var e_9, _a, e_10, _b, e_11, _c, e_12, _d;
+        var e_10, _a, e_11, _b, e_12, _c, e_13, _d;
         var primaryKeyHooks = {};
         var foreignKeyHooks = {};
         var originList = this.select(where);
@@ -373,28 +383,28 @@ var Basis = (function () {
                     foreignKeyHooks[origin[this.foreignKey]] = value[this.foreignKey];
                 }
                 try {
-                    for (var _e = (e_10 = void 0, __values(this.data.values())), _f = _e.next(); !_f.done; _f = _e.next()) {
+                    for (var _e = (e_11 = void 0, __values(this.data.values())), _f = _e.next(); !_f.done; _f = _e.next()) {
                         var map = _f.value;
                         if (map.has(key)) {
                             map.set(key, Object.assign({}, origin, value));
                         }
                     }
                 }
-                catch (e_10_1) { e_10 = { error: e_10_1 }; }
+                catch (e_11_1) { e_11 = { error: e_11_1 }; }
                 finally {
                     try {
                         if (_f && !_f.done && (_b = _e["return"])) _b.call(_e);
                     }
-                    finally { if (e_10) throw e_10.error; }
+                    finally { if (e_11) throw e_11.error; }
                 }
             }
         }
-        catch (e_9_1) { e_9 = { error: e_9_1 }; }
+        catch (e_10_1) { e_10 = { error: e_10_1 }; }
         finally {
             try {
                 if (originList_1_1 && !originList_1_1.done && (_a = originList_1["return"])) _a.call(originList_1);
             }
-            finally { if (e_9) throw e_9.error; }
+            finally { if (e_10) throw e_10.error; }
         }
         try {
             for (var _g = __values(Object.keys(primaryKeyHooks)), _h = _g.next(); !_h.done; _h = _g.next()) {
@@ -403,12 +413,12 @@ var Basis = (function () {
                 this._updatePrimaryKey(key, value_1);
             }
         }
-        catch (e_11_1) { e_11 = { error: e_11_1 }; }
+        catch (e_12_1) { e_12 = { error: e_12_1 }; }
         finally {
             try {
                 if (_h && !_h.done && (_c = _g["return"])) _c.call(_g);
             }
-            finally { if (e_11) throw e_11.error; }
+            finally { if (e_12) throw e_12.error; }
         }
         try {
             for (var _j = __values(Object.keys(foreignKeyHooks)), _k = _j.next(); !_k.done; _k = _j.next()) {
@@ -417,17 +427,17 @@ var Basis = (function () {
                 this._updateforeignKey(key, value_2);
             }
         }
-        catch (e_12_1) { e_12 = { error: e_12_1 }; }
+        catch (e_13_1) { e_13 = { error: e_13_1 }; }
         finally {
             try {
                 if (_k && !_k.done && (_d = _j["return"])) _d.call(_j);
             }
-            finally { if (e_12) throw e_12.error; }
+            finally { if (e_13) throw e_13.error; }
         }
         return originList.length;
     };
     Basis.prototype.remove = function (where) {
-        var e_13, _a, e_14, _b;
+        var e_14, _a, e_15, _b;
         if (_.keys(where).length < 1) {
             return 0;
         }
@@ -438,28 +448,28 @@ var Basis = (function () {
                 var item = list_1_1.value;
                 var id = item[this.primaryKey];
                 try {
-                    for (var _c = (e_14 = void 0, __values(this.data.values())), _d = _c.next(); !_d.done; _d = _c.next()) {
+                    for (var _c = (e_15 = void 0, __values(this.data.values())), _d = _c.next(); !_d.done; _d = _c.next()) {
                         var map = _d.value;
                         if (map["delete"](id)) {
                             count++;
                         }
                     }
                 }
-                catch (e_14_1) { e_14 = { error: e_14_1 }; }
+                catch (e_15_1) { e_15 = { error: e_15_1 }; }
                 finally {
                     try {
                         if (_d && !_d.done && (_b = _c["return"])) _b.call(_c);
                     }
-                    finally { if (e_14) throw e_14.error; }
+                    finally { if (e_15) throw e_15.error; }
                 }
             }
         }
-        catch (e_13_1) { e_13 = { error: e_13_1 }; }
+        catch (e_14_1) { e_14 = { error: e_14_1 }; }
         finally {
             try {
                 if (list_1_1 && !list_1_1.done && (_a = list_1["return"])) _a.call(list_1);
             }
-            finally { if (e_13) throw e_13.error; }
+            finally { if (e_14) throw e_14.error; }
         }
         return count;
     };
@@ -538,6 +548,7 @@ var DB = (function (_super) {
         return [item];
     };
     DB.prototype.childrenDeep = function (where) {
+        var e_16, _a;
         var _this = this;
         var result = [];
         var deep = function (query) {
@@ -553,7 +564,21 @@ var DB = (function (_super) {
                 deep(childrenWhere);
             }
         };
-        deep(where);
+        try {
+            for (var _b = __values(this.select(where)), _c = _b.next(); !_c.done; _c = _b.next()) {
+                var item = _c.value;
+                var query = {};
+                query[this.primaryKey] = item[this.primaryKey];
+                deep(query);
+            }
+        }
+        catch (e_16_1) { e_16 = { error: e_16_1 }; }
+        finally {
+            try {
+                if (_c && !_c.done && (_a = _b["return"])) _a.call(_b);
+            }
+            finally { if (e_16) throw e_16.error; }
+        }
         return result;
     };
     DB.prototype.parent = function (where) {
@@ -573,6 +598,7 @@ var DB = (function (_super) {
         return result;
     };
     DB.prototype.parentDeep = function (where) {
+        var e_17, _a;
         var _this = this;
         var result = [];
         var deep = function (list) {
@@ -586,7 +612,21 @@ var DB = (function (_super) {
                 deep(_this.parent(select));
             }
         };
-        deep(this.parent(where));
+        try {
+            for (var _b = __values(this.select(where)), _c = _b.next(); !_c.done; _c = _b.next()) {
+                var item = _c.value;
+                var query = {};
+                query[this.primaryKey] = item[this.primaryKey];
+                deep(this.parent(query));
+            }
+        }
+        catch (e_17_1) { e_17 = { error: e_17_1 }; }
+        finally {
+            try {
+                if (_c && !_c.done && (_a = _b["return"])) _a.call(_b);
+            }
+            finally { if (e_17) throw e_17.error; }
+        }
         return result;
     };
     return DB;

@@ -1,5 +1,5 @@
 
-const DB = require('../build/index.min.js');
+const DB = require('../build/index.js');
 
 const list = require('./data.json');
 // console.log(list);
@@ -13,7 +13,7 @@ db.insert(db.flatten(list, 'children'));
 
 
 const start = new Date().getTime();
-const arr = db.childrenDeep({ id: '100' });
+const arr = db.childrenDeep({ pid: '100' });
 // const arr = db.select({ id: 0});
 const stop = new Date().getTime();
 
@@ -23,7 +23,7 @@ console.log('总耗时: %s毫秒', stop - start);
 
 
 
-// console.log(arr);
+console.log(arr);
 
 // console.log(db.data);
 // console.log('------Update------');
