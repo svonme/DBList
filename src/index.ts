@@ -7,10 +7,10 @@ const _ = require('lodash');
 
 interface DataItem {
   [key: string]: any;
-};
+}
 
 interface Where extends DataItem{
-};
+}
 
 let _UUIDIndex = 1;
 function UUid() {

@@ -1,6 +1,9 @@
 
-interface Where {
+interface DataItem {
   [key: string]: any;
+}
+
+interface Where extends DataItem{
 }
 
 declare class Basis {
@@ -10,18 +13,13 @@ declare class Basis {
    * @param where 要查询的条件
    * @param limit 限定查询结果条数
    */
-  like(where?: Where, limit?: number): object[]
+  like(where?: Where, limit?: number): Array<DataItem>
   /**
    * 匹配查询
    * @param where 要查询的条件
    * @param limit 限定查询结果条数
    */
-  select<T>(where?: Where, limit?: number): T[]
-  /**
-   * 匹配查询且只返回第一条结果
-   * @param where 要查询的条件
-   */
-  selectOne<T>(where?: Where): T
+  select(where?: Where, limit?: number): Array<DataItem>
   /**
    * 添加数据
    * @param row
@@ -31,9 +29,8 @@ declare class Basis {
    * 修改
    * @param where 需要修改的数据的查询条件
    * @param value 新的数据
-   * @param limit 限制受影响的行数
    */
-  update(where: Where, value: object, limit?: number): number
+  update(where: Where, value: object): number
   /**
    * 删除数据
    * @param where 需要删除的数据的查询条件
@@ -48,10 +45,15 @@ declare class DB extends Basis {
    */
   getName(): string
   /**
+   * 匹配查询且只返回第一条结果
+   * @param where 要查询的条件
+   */
+  selectOne(where?: Where): DataItem
+  /**
    * 复制一份数据
    * @param callback 可以对每一个元素作处理
    */
-  clone<T>(callback?: Function): T[]
+  clone(callback?: Function): Array<DataItem>
   /**
    * /**
    * 将递归数据转换为一维数组
@@ -75,31 +77,31 @@ declare class DB extends Basis {
    *  }
    * ]
    */
-  flatten<T>(list: T[], childrenKey: string): T[]
+  flatten(list: Array<DataItem>, childrenKey: string): Array<DataItem>
   /**
    * 查询元素子级数据
    * @param where 查询条件
    * @param limit 指定查询条数
    */
-  children<T>(where: Where) : T[]
+  children(where: Where) : Array<DataItem>
   /**
    * 查询所有子级数据，相对 children 方法，该方法会进行递归查询
    * @param where 
    * @param limit 
    */
-  childrenDeep<T>(where: Where): T[]
+  childrenDeep(where: Where): Array<DataItem>
   /**
    * 查询父级数据，与 children 方法进行相反方向查询
    * @param where 
    * @param limit 
    */
-  parent<T>(where: Where): T[]
+  parent(where: Where): Array<DataItem>
   /**
    * 查询所有父级数据，与 与 childrenDeep 方法进行相反方向查询
    * @param where 
    * @param limit 
    */
-  parentDeep<T>(where: Where, limit?: number): T[]
+  parentDeep(where: Where, limit?: number): Array<DataItem>
 }
 
 export = DB;
