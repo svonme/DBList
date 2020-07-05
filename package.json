@@ -29,5 +29,13 @@
     "@types/lodash": "^4.14.155",
     "@types/node": "^14.0.13",
     "uglify-js": "^3.9.4"
-  }
+  },
+  "files": [
+    "build/",
+    "src/",
+    "types/",
+    "tsconfig.json",
+    "README.md",
+    "package.json"
+  ]
 }
