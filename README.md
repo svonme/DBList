@@ -205,11 +205,9 @@ const where = { id: 1 }
 db.children(where)
 
 [
-  [
-    { id: 1, value: '北京' },
-    { id: 2, value: '朝阳区' },
-    { id: 3, value: '东城区' }
-  ]
+  { id: 1, value: '北京' },
+  { id: 2, value: '朝阳区' },
+  { id: 3, value: '东城区' }
 ]
 ```
 
@@ -222,10 +220,8 @@ const where = { id: 2 }
 db.parent(where)
 
 [
-  [
-    { id: 2, value: '朝阳区' },
-    { id: 1, value: '北京' }
-  ]
+  { id: 2, value: '朝阳区' },
+  { id: 1, value: '北京' }
 ]
 ```
 
@@ -238,12 +234,10 @@ const where = { id: 1 }
 db.children(where)
 
 [
-  [
-    { id: 1, value: '北京' },
-    { id: 2, value: '朝阳区' },
-    { id: 3, value: '东城区' },
-    { id: 4, value: '三里屯' }
-  ]
+  { id: 1, value: '北京' },
+  { id: 2, value: '朝阳区' },
+  { id: 3, value: '东城区' },
+  { id: 4, value: '三里屯' }
 ]
 ```
 
@@ -256,11 +250,9 @@ const where = { id: 4 }
 db.parent(where)
 
 [
-  [
-    { id: 4, value: '三里屯' }
-    { id: 2, value: '朝阳区' },
-    { id: 1, value: '北京' }
-  ]
+  { id: 4, value: '三里屯' }
+  { id: 2, value: '朝阳区' },
+  { id: 1, value: '北京' }
 ]
 ```
 
