@@ -375,18 +375,24 @@ var Basis = (function () {
             for (var originList_1 = __values(originList), originList_1_1 = originList_1.next(); !originList_1_1.done; originList_1_1 = originList_1.next()) {
                 var origin = originList_1_1.value;
                 var key = origin[this.primaryKey];
-                if (this.primaryKey in value) {
-                    primaryKeyHooks[key] = value[this.primaryKey];
-                    foreignKeyHooks[key] = value[this.primaryKey];
-                }
-                if (this.foreignKey in value) {
-                    foreignKeyHooks[origin[this.foreignKey]] = value[this.foreignKey];
-                }
                 try {
-                    for (var _e = (e_11 = void 0, __values(this.data.values())), _f = _e.next(); !_f.done; _f = _e.next()) {
-                        var map = _f.value;
+                    for (var _e = (e_11 = void 0, __values(this.data.keys())), _f = _e.next(); !_f.done; _f = _e.next()) {
+                        var foreignKey = _f.value;
+                        var map = this.data.get(foreignKey);
                         if (map.has(key)) {
-                            map.set(key, Object.assign({}, origin, value));
+                            if (foreignKey === this.unknownKey) {
+                                if (this.foreignKey in value) {
+                                    map["delete"](key);
+                                    if (!(this.data.has(value[this.foreignKey]))) {
+                                        this.data.set(value[this.foreignKey], new Map());
+                                    }
+                                    var temp = this.data.get(value[this.foreignKey]);
+                                    temp.set(key, Object.assign({}, origin, value));
+                                }
+                            }
+                            else {
+                                map.set(key, Object.assign({}, origin, value));
+                            }
                         }
                     }
                 }
@@ -396,6 +402,15 @@ var Basis = (function () {
                         if (_f && !_f.done && (_b = _e["return"])) _b.call(_e);
                     }
                     finally { if (e_11) throw e_11.error; }
+                }
+                if (this.primaryKey in value) {
+                    primaryKeyHooks[key] = value[this.primaryKey];
+                    foreignKeyHooks[key] = value[this.primaryKey];
+                }
+                if (this.foreignKey in value) {
+                    if (origin[this.foreignKey]) {
+                        foreignKeyHooks[origin[this.foreignKey]] = value[this.foreignKey];
+                    }
                 }
             }
         }

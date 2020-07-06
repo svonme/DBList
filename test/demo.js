@@ -1,32 +1,19 @@
 
 const DB = require('../build/index.js');
 
-const list = require('./data.json');
+const list = require('./list');
 // console.log(list);
 
 
 const db = new DB('test', [], 'id', 'pid', 0);
 
-db.insert(db.flatten(list, 'children'));
-// db.insert(list);
+// db.insert(db.flatten(list, 'children'));
+db.insert(list);
 
 
+console.log(db.data);
 
-const start = new Date().getTime();
-const arr = db.childrenDeep({ pid: '100' });
-// const arr = db.select({ id: 0});
-const stop = new Date().getTime();
-
-console.log('DB 数据总条数: %s', db.size());
-console.log('select 结果条数: %s', arr.length);
-console.log('总耗时: %s毫秒', stop - start);
+db.update({ id: 'A1' }, { pid: '0-A' });
 
 
-
-console.log(arr);
-
-// console.log(db.data);
-// console.log('------Update------');
-// db.update({ id: 'A1-1' }, { id: 'A1-1-new' });
-// console.log('------Update------');
-// console.log(db.data);
+console.log(db.data);

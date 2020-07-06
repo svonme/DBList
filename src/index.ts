@@ -315,6 +315,28 @@ class Basis {
     const originList = this.select(where);
     for (const origin of originList) {
       const key = origin[this.primaryKey];
+      // 新数据
+      for(const foreignKey of this.data.keys()) {
+        const map = this.data.get(foreignKey);
+        if(map.has(key)) {
+          if (foreignKey === this.unknownKey) {
+            // 如果外键发生变化
+            if (this.foreignKey in value) {
+              // 删除数据
+              map.delete(key);
+              // 判断新的外键是否存在, 不存在则创建
+              if (!(this.data.has(value[this.foreignKey]))) {
+                this.data.set(value[this.foreignKey], new Map());
+              }
+              // 添加数据
+              const temp = this.data.get(value[this.foreignKey]);
+              temp.set(key, Object.assign({}, origin, value));
+            }
+          } else {
+            map.set(key, Object.assign({}, origin, value));
+          }
+        }
+      }
       // 查询主键是否发生变化
       if (this.primaryKey in value) {
         primaryKeyHooks[key] = value[this.primaryKey];
@@ -322,12 +344,9 @@ class Basis {
       }
       // 查询外键是否发生变化
       if (this.foreignKey in value) {
-        foreignKeyHooks[origin[this.foreignKey]] = value[this.foreignKey];
-      }
-      // 新数据
-      for(const map of this.data.values()) {
-        if(map.has(key)) {
-          map.set(key, Object.assign({}, origin, value));
+        // 并且原数据有外键
+        if (origin[this.foreignKey]) {
+          foreignKeyHooks[origin[this.foreignKey]] = value[this.foreignKey];
         }
       }
     }
