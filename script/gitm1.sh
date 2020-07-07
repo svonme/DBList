@@ -2,7 +2,7 @@
 
 cd `dirname $0`
 
-# cd ..
+cd ..
 
 git filter-branch -f --env-filter '
 OLD_EMAIL="svon@svon.org"
