@@ -278,7 +278,6 @@ var Basis = (function () {
         return this.Where(where, limit, false);
     };
     Basis.prototype.insert = function (row) {
-        var e_7, _a;
         if (!row) {
             return 0;
         }
@@ -289,24 +288,13 @@ var Basis = (function () {
                 item[this.primaryKey] = UUid();
             }
             if (this.foreignKey in item) {
-                try {
-                    for (var _b = (e_7 = void 0, __values([].concat(item[this.foreignKey]))), _c = _b.next(); !_c.done; _c = _b.next()) {
-                        var pid = _c.value;
-                        var map = this.data.get(pid);
-                        if (!map) {
-                            this.data.set(pid, new Map());
-                            map = this.data.get(pid);
-                        }
-                        map.set(item[this.primaryKey], item);
-                    }
+                var _a = __read([].concat(item[this.foreignKey]), 1), pid = _a[0];
+                var map = this.data.get(pid);
+                if (!map) {
+                    this.data.set(pid, new Map());
+                    map = this.data.get(pid);
                 }
-                catch (e_7_1) { e_7 = { error: e_7_1 }; }
-                finally {
-                    try {
-                        if (_c && !_c.done && (_a = _b["return"])) _a.call(_b);
-                    }
-                    finally { if (e_7) throw e_7.error; }
-                }
+                map.set(item[this.primaryKey], item);
             }
             else {
                 var map = this.data.get(this.unknownKey);
@@ -316,7 +304,7 @@ var Basis = (function () {
         return list.length;
     };
     Basis.prototype._updatePrimaryKey = function (originKey, newKey) {
-        var e_8, _a;
+        var e_7, _a;
         var foreignKeys = this.data.keys();
         try {
             for (var foreignKeys_2 = __values(foreignKeys), foreignKeys_2_1 = foreignKeys_2.next(); !foreignKeys_2_1.done; foreignKeys_2_1 = foreignKeys_2.next()) {
@@ -329,16 +317,16 @@ var Basis = (function () {
                 }
             }
         }
-        catch (e_8_1) { e_8 = { error: e_8_1 }; }
+        catch (e_7_1) { e_7 = { error: e_7_1 }; }
         finally {
             try {
                 if (foreignKeys_2_1 && !foreignKeys_2_1.done && (_a = foreignKeys_2["return"])) _a.call(foreignKeys_2);
             }
-            finally { if (e_8) throw e_8.error; }
+            finally { if (e_7) throw e_7.error; }
         }
     };
     Basis.prototype._updateforeignKey = function (originKey, newKey) {
-        var e_9, _a;
+        var e_8, _a;
         if (this.data.has(originKey)) {
             var map = this.data.get(originKey);
             try {
@@ -355,19 +343,19 @@ var Basis = (function () {
                     map.set(key, value);
                 }
             }
-            catch (e_9_1) { e_9 = { error: e_9_1 }; }
+            catch (e_8_1) { e_8 = { error: e_8_1 }; }
             finally {
                 try {
                     if (_c && !_c.done && (_a = _b["return"])) _a.call(_b);
                 }
-                finally { if (e_9) throw e_9.error; }
+                finally { if (e_8) throw e_8.error; }
             }
             this.data["delete"](originKey);
             this.data.set(newKey, map);
         }
     };
     Basis.prototype.update = function (where, value) {
-        var e_10, _a, e_11, _b, e_12, _c, e_13, _d;
+        var e_9, _a, e_10, _b, e_11, _c, e_12, _d;
         var primaryKeyHooks = {};
         var foreignKeyHooks = {};
         var originList = this.select(where);
@@ -376,7 +364,7 @@ var Basis = (function () {
                 var origin = originList_1_1.value;
                 var key = origin[this.primaryKey];
                 try {
-                    for (var _e = (e_11 = void 0, __values(this.data.keys())), _f = _e.next(); !_f.done; _f = _e.next()) {
+                    for (var _e = (e_10 = void 0, __values(this.data.keys())), _f = _e.next(); !_f.done; _f = _e.next()) {
                         var foreignKey = _f.value;
                         var map = this.data.get(foreignKey);
                         if (map.has(key)) {
@@ -396,12 +384,12 @@ var Basis = (function () {
                         }
                     }
                 }
-                catch (e_11_1) { e_11 = { error: e_11_1 }; }
+                catch (e_10_1) { e_10 = { error: e_10_1 }; }
                 finally {
                     try {
                         if (_f && !_f.done && (_b = _e["return"])) _b.call(_e);
                     }
-                    finally { if (e_11) throw e_11.error; }
+                    finally { if (e_10) throw e_10.error; }
                 }
                 if (this.primaryKey in value) {
                     primaryKeyHooks[key] = value[this.primaryKey];
@@ -414,12 +402,12 @@ var Basis = (function () {
                 }
             }
         }
-        catch (e_10_1) { e_10 = { error: e_10_1 }; }
+        catch (e_9_1) { e_9 = { error: e_9_1 }; }
         finally {
             try {
                 if (originList_1_1 && !originList_1_1.done && (_a = originList_1["return"])) _a.call(originList_1);
             }
-            finally { if (e_10) throw e_10.error; }
+            finally { if (e_9) throw e_9.error; }
         }
         try {
             for (var _g = __values(Object.keys(primaryKeyHooks)), _h = _g.next(); !_h.done; _h = _g.next()) {
@@ -428,12 +416,12 @@ var Basis = (function () {
                 this._updatePrimaryKey(key, value_1);
             }
         }
-        catch (e_12_1) { e_12 = { error: e_12_1 }; }
+        catch (e_11_1) { e_11 = { error: e_11_1 }; }
         finally {
             try {
                 if (_h && !_h.done && (_c = _g["return"])) _c.call(_g);
             }
-            finally { if (e_12) throw e_12.error; }
+            finally { if (e_11) throw e_11.error; }
         }
         try {
             for (var _j = __values(Object.keys(foreignKeyHooks)), _k = _j.next(); !_k.done; _k = _j.next()) {
@@ -442,17 +430,17 @@ var Basis = (function () {
                 this._updateforeignKey(key, value_2);
             }
         }
-        catch (e_13_1) { e_13 = { error: e_13_1 }; }
+        catch (e_12_1) { e_12 = { error: e_12_1 }; }
         finally {
             try {
                 if (_k && !_k.done && (_d = _j["return"])) _d.call(_j);
             }
-            finally { if (e_13) throw e_13.error; }
+            finally { if (e_12) throw e_12.error; }
         }
         return originList.length;
     };
     Basis.prototype.remove = function (where) {
-        var e_14, _a, e_15, _b;
+        var e_13, _a, e_14, _b;
         if (_.keys(where).length < 1) {
             return 0;
         }
@@ -463,28 +451,28 @@ var Basis = (function () {
                 var item = list_1_1.value;
                 var id = item[this.primaryKey];
                 try {
-                    for (var _c = (e_15 = void 0, __values(this.data.values())), _d = _c.next(); !_d.done; _d = _c.next()) {
+                    for (var _c = (e_14 = void 0, __values(this.data.values())), _d = _c.next(); !_d.done; _d = _c.next()) {
                         var map = _d.value;
                         if (map["delete"](id)) {
                             count++;
                         }
                     }
                 }
-                catch (e_15_1) { e_15 = { error: e_15_1 }; }
+                catch (e_14_1) { e_14 = { error: e_14_1 }; }
                 finally {
                     try {
                         if (_d && !_d.done && (_b = _c["return"])) _b.call(_c);
                     }
-                    finally { if (e_15) throw e_15.error; }
+                    finally { if (e_14) throw e_14.error; }
                 }
             }
         }
-        catch (e_14_1) { e_14 = { error: e_14_1 }; }
+        catch (e_13_1) { e_13 = { error: e_13_1 }; }
         finally {
             try {
                 if (list_1_1 && !list_1_1.done && (_a = list_1["return"])) _a.call(list_1);
             }
-            finally { if (e_14) throw e_14.error; }
+            finally { if (e_13) throw e_13.error; }
         }
         return count;
     };
@@ -552,87 +540,98 @@ var DB = (function (_super) {
         deep(list, this.foreignKeyValue);
         return data;
     };
-    DB.prototype.children = function (where) {
-        var item = this.selectOne(where);
+    DB.prototype.children = function (where, childrenKey) {
+        if (childrenKey === void 0) { childrenKey = 'children'; }
+        var item;
+        if (this.primaryKey in where && this.foreignKey in where) {
+            item = Object.assign({}, where);
+        }
+        else {
+            item = Object.assign({}, this.selectOne(where));
+        }
         if (item) {
             var childrenWhere = {};
             childrenWhere[this.foreignKey] = item[this.primaryKey];
-            var children = this.select(childrenWhere);
-            return [].concat(item, children);
+            return this.select(childrenWhere);
         }
-        return [item];
+        return [];
     };
-    DB.prototype.childrenDeep = function (where) {
-        var e_16, _a;
+    DB.prototype.childrenDeep = function (where, childrenKey) {
+        var e_15, _a;
         var _this = this;
-        var result = [];
+        if (childrenKey === void 0) { childrenKey = 'children'; }
         var deep = function (query) {
-            var list = _this.children(query);
-            if (list[0]) {
-                result.push(list[0]);
+            var e_16, _a;
+            var list = _this.children(query, childrenKey);
+            try {
+                for (var list_2 = __values(list), list_2_1 = list_2.next(); !list_2_1.done; list_2_1 = list_2.next()) {
+                    var item = list_2_1.value;
+                    item[childrenKey] = deep(item);
+                }
             }
-            var children = list.slice(1);
-            for (var i = 0, len = children.length; i < len; i++) {
-                var node = children[i];
-                var childrenWhere = {};
-                childrenWhere[_this.primaryKey] = node[_this.primaryKey];
-                deep(childrenWhere);
+            catch (e_16_1) { e_16 = { error: e_16_1 }; }
+            finally {
+                try {
+                    if (list_2_1 && !list_2_1.done && (_a = list_2["return"])) _a.call(list_2);
+                }
+                finally { if (e_16) throw e_16.error; }
             }
+            return list;
         };
+        var result = [];
         try {
             for (var _b = __values(this.select(where)), _c = _b.next(); !_c.done; _c = _b.next()) {
                 var item = _c.value;
+                var data = Object.assign({}, item);
                 var query = {};
-                query[this.primaryKey] = item[this.primaryKey];
-                deep(query);
+                query[this.primaryKey] = data[this.primaryKey];
+                data[childrenKey] = deep(query);
+                result.push(data);
             }
         }
-        catch (e_16_1) { e_16 = { error: e_16_1 }; }
+        catch (e_15_1) { e_15 = { error: e_15_1 }; }
         finally {
             try {
                 if (_c && !_c.done && (_a = _b["return"])) _a.call(_b);
             }
-            finally { if (e_16) throw e_16.error; }
+            finally { if (e_15) throw e_15.error; }
         }
         return result;
     };
     DB.prototype.parent = function (where) {
-        var result = [];
-        var item = this.selectOne(where);
-        if (item) {
-            result.push(item);
-            if (this.foreignKeyValue !== item[this.foreignKey]) {
+        if (this.foreignKey in where) {
+            var parentWhere = {};
+            parentWhere[this.primaryKey] = where[this.foreignKey];
+            return this.selectOne(parentWhere);
+        }
+        else {
+            var item = this.selectOne(where);
+            if (item) {
                 var parentWhere = {};
                 parentWhere[this.primaryKey] = item[this.foreignKey];
-                var parent = this.selectOne(parentWhere);
-                if (parent) {
-                    result.push(parent);
-                }
+                return this.selectOne(parentWhere);
             }
+            return void 0;
         }
-        return result;
     };
-    DB.prototype.parentDeep = function (where) {
+    DB.prototype.parentDeep = function (where, parentKey) {
         var e_17, _a;
         var _this = this;
+        if (parentKey === void 0) { parentKey = 'parent'; }
         var result = [];
-        var deep = function (list) {
-            if (list[0]) {
-                result.push(list[0]);
+        var deep = function (where) {
+            var parent = _this.parent(where);
+            if (parent) {
+                parent[parentKey] = deep(parent);
             }
-            if (list[1]) {
-                var parent = list[1];
-                var select = {};
-                select[_this.primaryKey] = parent[_this.primaryKey];
-                deep(_this.parent(select));
-            }
+            return parent;
         };
         try {
             for (var _b = __values(this.select(where)), _c = _b.next(); !_c.done; _c = _b.next()) {
                 var item = _c.value;
-                var query = {};
-                query[this.primaryKey] = item[this.primaryKey];
-                deep(this.parent(query));
+                var data = Object.assign({}, item);
+                data[parentKey] = deep(data);
+                result.push(data);
             }
         }
         catch (e_17_1) { e_17 = { error: e_17_1 }; }
