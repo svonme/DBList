@@ -196,34 +196,69 @@ new DBList(name, list, primaryKey, foreignKey)
 |  fristForeignValue | 否 | 第一层外键的值 | "0" |
 
 
+### 测试数据
+
+```
+[
+  {
+    "id": "100",
+    "name": "A",
+    "pid": 0
+  },
+  {
+    "id": "101",
+    "name": "B",
+    "pid": "100"
+  },
+  {
+    "id": "102",
+    "name": "C",
+    "pid": "101"
+  },
+  {
+    "id": "103",
+    "name": "D",
+    "pid": "102"
+  },
+  {
+    "id": "104",
+    "name": "E",
+    "pid": "103"
+  }
+]
+```
+
 
 ## children 查询子级数据
 
-查询 id = 1 的子级数据 (查询所有与 id = 1 有关联的数据)
+查询 id = 100 的子级数据
 
 ```
-const where = { id: 1 }
+const where = { id: '100' }
 db.children(where)
 
 [
-  { id: 1, value: '北京' },
-  { id: 2, value: '朝阳区' },
-  { id: 3, value: '东城区' }
+  {
+    "id": "101",
+    "name": "B",
+    "pid": "100"
+  }
 ]
 ```
 
 ## parent 查询父级数据
 
-查询 id = 2 的父级数据 (查询所有与 id = 2 有关联的数据)
+查询 id = 104 的父级数据 (父级返回的是对象，非数组)
 
 ```
-const where = { id: 2 }
+const where = { id: '104' }
 db.parent(where)
 
-[
-  { id: 2, value: '朝阳区' },
-  { id: 1, value: '北京' }
-]
+{
+  "id": "103",
+  "name": "D",
+  "pid": "102"
+}
 ```
 
 ## childrenDeep 递归查询子级数据
@@ -231,14 +266,46 @@ db.parent(where)
 该方法与 children 类似, children 只会查询一层子级数据，childrenDeep 则会进行递归查询
 
 ```
-const where = { id: 1 }
-db.children(where)
+const where = { id: '100' }
+db.childrenDeep(where)
+// db.childrenDeep(where, 'children') 
+// 第二个参数用于指定 children 列表的键值，默认 children
 
 [
-  { id: 1, value: '北京' },
-  { id: 2, value: '朝阳区' },
-  { id: 3, value: '东城区' },
-  { id: 4, value: '三里屯' }
+  {
+    "id": "100",
+    "name": "A",
+    "pid": 0,
+    "children": [
+      {
+        "id": "101",
+        "name": "B",
+        "pid": "100",
+        "children": [
+          {
+            "id": "102",
+            "name": "C",
+            "pid": "101",
+            "children": [
+              {
+                "id": "103",
+                "name": "D",
+                "pid": "102",
+                "children": [
+                  {
+                    "id": "104",
+                    "name": "E",
+                    "pid": "103",
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
 ]
 ```
 
@@ -247,13 +314,38 @@ db.children(where)
 该方法与 parent 类似, parent 只会查询一层父级数据，parentDeep 则会进行递归查询
 
 ```
-const where = { id: 4 }
-db.parent(where)
+const where = { id: '104' }
+db.parentDeep(where)
+
+// db.parentDeep(where, 'parent') 
+// 第二个参数用于指定 parent 列表的键值，默认 parent
 
 [
-  { id: 4, value: '三里屯' }
-  { id: 2, value: '朝阳区' },
-  { id: 1, value: '北京' }
+  {
+    "id": "104",
+    "name": "E",
+    "pid": "103",
+    "parent": {
+      "id": "103",
+      "name": "D",
+      "pid": "102",
+      "parent": {
+        "id": "102",
+        "name": "C",
+        "pid": "101",
+        "parent": {
+          "id": "101",
+          "name": "B",
+          "pid": "100",
+          "parent": {
+            "id": "100",
+            "name": "A",
+            "pid": 0
+          }
+        }
+      }
+    }
+  }
 ]
 ```
 
