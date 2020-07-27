@@ -3,6 +3,9 @@
  * @author svon.me@gmail.com
  */
 
+import { Interface } from "readline";
+import { deprecate } from "util";
+
 const _ = require('lodash');
 
 interface DataItem {
@@ -252,14 +255,13 @@ class Basis {
         item[this.primaryKey] = UUid();
       }
       if (this.foreignKey in item) {
-        for(const pid of [].concat(item[this.foreignKey])) {
-          let map = this.data.get(pid);
-          if (!map) {
-            this.data.set(pid, new Map());
-            map = this.data.get(pid);
-          }
-          map.set(item[this.primaryKey], item);
+        const [pid] = [].concat(item[this.foreignKey]);
+        let map = this.data.get(pid);
+        if (!map) {
+          this.data.set(pid, new Map());
+          map = this.data.get(pid);
         }
+        map.set(item[this.primaryKey], item);
       } else {
         const map = this.data.get(this.unknownKey);
         map.set(item[this.primaryKey], item);
@@ -344,7 +346,7 @@ class Basis {
       }
       // 查询外键是否发生变化
       if (this.foreignKey in value) {
-        // 并且原数据有外键
+        // 原数据有外键
         if (origin[this.foreignKey]) {
           foreignKeyHooks[origin[this.foreignKey]] = value[this.foreignKey];
         }
@@ -456,41 +458,40 @@ class DB extends Basis {
    * @param where 查询条件
    * @param limit 指定查询条数
    */
-  children(where: Where): Array<DataItem> {
-    const item = this.selectOne(where);
+  children(where: Where, childrenKey: string = 'children'): Array<DataItem> {
+    let item: DataItem;
+    if (this.primaryKey in where && this.foreignKey in where) {
+      item = Object.assign({}, where);
+    } else {
+      item = Object.assign({}, this.selectOne(where));
+    }
     if (item) {
       const childrenWhere: Where = {};
       childrenWhere[this.foreignKey] = item[this.primaryKey];
-      const children = this.select(childrenWhere);
-      return [].concat(item, children);
+      return this.select(childrenWhere);
     }
-    return [item];
+    return [];
   }
   /**
    * 查询所有子级数据，相对 children 方法，该方法会进行递归查询
    * @param where 
    * @param limit 
    */
-  childrenDeep(where: Where): Array<DataItem> {
-    const result: Array<DataItem> = [];
-    const deep = (query: Where) => {
-      const list: Array<DataItem> = this.children(query)
-      if (list[0]) {
-        result.push(list[0]);
+  childrenDeep(where: Where, childrenKey: string = 'children'): Array<DataItem> {
+    const deep = (query: Where): DataItem => {
+      const list = this.children(query, childrenKey);
+      for(const item of list) {
+        item[childrenKey] = deep(item as Where);
       }
-      const children = list.slice(1);
-      for(let i = 0, len = children.length; i < len; i++){
-        const node = children[i];
-        const childrenWhere: Where = {};
-        childrenWhere[this.primaryKey] = node[this.primaryKey];
-        deep(childrenWhere);
-      }
+      return list;
     };
-
+    const result: Array<DataItem> = [];
     for(const item of this.select(where)) {
+      const data = Object.assign({}, item);
       const query: Where = {};
-      query[this.primaryKey] = item[this.primaryKey];
-      deep(query);
+      query[this.primaryKey] = data[this.primaryKey];
+      data[childrenKey] = deep(query)
+      result.push(data);
     }
     return result;
   }
@@ -499,45 +500,39 @@ class DB extends Basis {
    * @param where 
    * @param limit 
    */
-  parent(where: Where): Array<DataItem> {
-    const result: Array<DataItem> = [];
-    const item = this.selectOne(where);
-    if (item) {
-      result.push(item);
-      // 判断是否是第一层数据
-      if (this.foreignKeyValue !== item[this.foreignKey]) {
+  parent(where: Where): DataItem {
+    if (this.foreignKey in where) {
+      const parentWhere: Where = {};
+      parentWhere[this.primaryKey] = where[this.foreignKey];
+      return this.selectOne(parentWhere);
+    } else {
+      const item = this.selectOne(where);
+      if (item) {
         const parentWhere: Where = {};
         parentWhere[this.primaryKey] = item[this.foreignKey];
-        const parent = this.selectOne(parentWhere);
-        if (parent) {
-          result.push(parent);
-        }
+        return this.selectOne(parentWhere);
       }
+      return void 0;
     }
-    return result;
   }
   /**
-   * 查询所有父级数据，与 与 childrenDeep 方法进行相反方向查询
+   * 查询所有父级数据，与 childrenDeep 方法进行相反方向查询
    * @param where 
    * @param limit 
    */
-  parentDeep(where: Where): Array<DataItem> {
+  parentDeep(where: Where, parentKey: string = 'parent'): Array<DataItem> {
     const result: Array<DataItem> = []
-    const deep = (list: Array<DataItem>) => {
-      if (list[0]) {
-        result.push(list[0]);
+    const deep = (where: Where): DataItem => {
+      const parent = this.parent(where);
+      if (parent) {
+        parent[parentKey] = deep(parent);
       }
-      if (list[1]) {
-        const parent = list[1];
-        const select: Where = {};
-        select[this.primaryKey] = parent[this.primaryKey];
-        deep(this.parent(select));
-      }
+      return parent;
     }
     for(const item of this.select(where)) {
-      const query: Where = {};
-      query[this.primaryKey] = item[this.primaryKey];
-      deep(this.parent(query));
+      const data = Object.assign({}, item);
+      data[parentKey] = deep(data);
+      result.push(data);
     }
     return result;
   }
