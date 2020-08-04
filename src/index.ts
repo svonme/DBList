@@ -462,7 +462,7 @@ class DB extends Basis {
     if (item) {
       const childrenWhere: Where = {};
       childrenWhere[this.foreignKey] = item[this.primaryKey];
-      return this.select(childrenWhere);
+      return _.map(this.select(childrenWhere), (data: DataItem) => _.clone(data));
     }
     return [];
   }
@@ -503,13 +503,15 @@ class DB extends Basis {
     if (this.foreignKey in where) {
       const parentWhere: Where = {};
       parentWhere[this.primaryKey] = where[this.foreignKey];
-      return this.selectOne(parentWhere);
+      const value = this.selectOne(parentWhere)
+      return value ? _.clone(value) : void 0;
     } else {
       const item = this.selectOne(where);
       if (item) {
         const parentWhere: Where = {};
         parentWhere[this.primaryKey] = item[this.foreignKey];
-        return this.selectOne(parentWhere);
+        const value = this.selectOne(parentWhere)
+        return value ? _.clone(value) : void 0;
       }
       return void 0;
     }

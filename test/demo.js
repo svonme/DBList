@@ -12,10 +12,10 @@ const test = db.flatten(list, 'children')
 db.insert(test);
 
 
-// const data = db.parentDeep({ id: '104' });
+const data = db.parentDeep({ id: '104' });
 
 
-const data = db.childrenDeep({ id: '100' });
+// const data = db.childrenDeep({ id: '100' });
 
 
 

@@ -551,7 +551,7 @@ var DB = (function (_super) {
         if (item) {
             var childrenWhere = {};
             childrenWhere[this.foreignKey] = item[this.primaryKey];
-            return this.select(childrenWhere);
+            return _.map(this.select(childrenWhere), function (data) { return _.clone(data); });
         }
         return [];
     };
@@ -607,14 +607,16 @@ var DB = (function (_super) {
         if (this.foreignKey in where) {
             var parentWhere = {};
             parentWhere[this.primaryKey] = where[this.foreignKey];
-            return this.selectOne(parentWhere);
+            var value = this.selectOne(parentWhere);
+            return value ? _.clone(value) : void 0;
         }
         else {
             var item = this.selectOne(where);
             if (item) {
                 var parentWhere = {};
                 parentWhere[this.primaryKey] = item[this.foreignKey];
-                return this.selectOne(parentWhere);
+                var value = this.selectOne(parentWhere);
+                return value ? _.clone(value) : void 0;
             }
             return void 0;
         }
