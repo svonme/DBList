@@ -284,10 +284,10 @@ var Basis = (function () {
         var list = [].concat(row);
         for (var i = 0, len = list.length; i < len; i++) {
             var item = list[i];
-            if (!(this.primaryKey in item)) {
+            if (!item.hasOwnProperty(this.primaryKey)) {
                 item[this.primaryKey] = UUid();
             }
-            if (this.foreignKey in item) {
+            if (item.hasOwnProperty(this.foreignKey)) {
                 var _a = __read([].concat(item[this.foreignKey]), 1), pid = _a[0];
                 var map = this.data.get(pid);
                 if (!map) {

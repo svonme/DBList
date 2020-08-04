@@ -248,10 +248,10 @@ class Basis {
     for(let i = 0, len = list.length; i < len; i++){
       const item = list[i];
       // 判断是否存在主健
-      if (!(this.primaryKey in item)) {
+      if (!item.hasOwnProperty(this.primaryKey) ) {
         item[this.primaryKey] = UUid();
       }
-      if (this.foreignKey in item) {
+      if (item.hasOwnProperty(this.foreignKey)) {
         const [pid] = [].concat(item[this.foreignKey]);
         let map = this.data.get(pid);
         if (!map) {
