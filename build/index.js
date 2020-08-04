@@ -485,7 +485,16 @@ var DB = (function (_super) {
         if (primaryKey === void 0) { primaryKey = 'id'; }
         if (foreignKey === void 0) { foreignKey = 'pid'; }
         if (foreignKeyValue === void 0) { foreignKeyValue = '0'; }
-        return _super.call(this, list, primaryKey, foreignKey, foreignKeyValue) || this;
+        var _this = this;
+        if (_.isString(list)) {
+            console.warn('Dblist has removed the name field in version 0.2.4');
+            list = primaryKey;
+            primaryKey = foreignKey;
+            foreignKey = foreignKeyValue;
+            foreignKeyValue = '0';
+        }
+        _this = _super.call(this, list, primaryKey, foreignKey, foreignKeyValue) || this;
+        return _this;
     }
     DB.prototype.selectOne = function (where) {
         var _a = __read(this.select(where, 1), 1), data = _a[0];

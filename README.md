@@ -49,9 +49,9 @@ const list = [{
 
 生成一个 dblist 对象
 ```
-const db = new DBList('db name', list)
+const db = new DBList(list)
 或者
-const db = new DBList('db name')
+const db = new DBList()
 db.insert(list)
 ```
 
@@ -167,7 +167,7 @@ const list = [
 解构上面的递归结构数据
 
 ```
-const db = new DBList('db flatten', [], 'id', 'pid')
+const db = new DBList([], 'id', 'pid')
 const data = db.flatten(list, 'children')  // children 为数据结构中的递归字段
 
 [
@@ -184,7 +184,7 @@ pid 为自动生成的外键关系数据，详情参考下面的介绍
 ## 构造参数
 
 ```
-new DBList(name, list, primaryKey, foreignKey)
+new DBList(list, primaryKey, foreignKey)
 ```
 
 |  字段 | 是否可以为空  | 说明  | 默认值  |

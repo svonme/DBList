@@ -4,7 +4,7 @@ const DB = require('../build/index.js');
 const list = require('./test.json');
 // console.log(list);
 
-const db = new DB([], 'id', 'pid', 0);
+const db = new DB('test', [], 'id', 'pid', 0);
 
 const test = db.flatten(list, 'children')
 

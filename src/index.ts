@@ -387,9 +387,15 @@ class Basis {
 
 
 class DB extends Basis {
-  /** DB 名称 */
-  private name: string;
   constructor(list: Array<DataItem> = [], primaryKey: string = 'id', foreignKey: string = 'pid', foreignKeyValue: string = '0') {
+    // 如果第一个参数为字符串，则为无效参数（旧版本有该参数，0.2.4版本时已取消）
+    if (_.isString(list)) {
+      console.warn('Dblist has removed the name field in version 0.2.4');
+      list = primaryKey as any
+      primaryKey = foreignKey
+      foreignKey = foreignKeyValue
+      foreignKeyValue = '0'
+    }
     super(list, primaryKey, foreignKey, foreignKeyValue);
   }
   selectOne(where: Where): DataItem {
