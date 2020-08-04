@@ -3,9 +3,6 @@
  * @author svon.me@gmail.com
  */
 
-import { Interface } from "readline";
-import { deprecate } from "util";
-
 const _ = require('lodash');
 
 interface DataItem {
@@ -392,16 +389,8 @@ class Basis {
 class DB extends Basis {
   /** DB 名称 */
   private name: string;
-  constructor(name: string = UUid(), list: Array<DataItem> = [], primaryKey: string = 'id', foreignKey: string = 'pid', foreignKeyValue: string = '0') {
+  constructor(list: Array<DataItem> = [], primaryKey: string = 'id', foreignKey: string = 'pid', foreignKeyValue: string = '0') {
     super(list, primaryKey, foreignKey, foreignKeyValue);
-    // 设置数据库名称
-    this.setName(name);
-  }
-  protected setName(name: string): void {
-    this.name = name;
-  }
-  protected getName(): string {
-    return this.name;
   }
   selectOne(where: Where): DataItem {
     const [ data ]: Array<DataItem> = this.select(where, 1);
@@ -456,9 +445,8 @@ class DB extends Basis {
   /**
    * 查询元素子级数据
    * @param where 查询条件
-   * @param limit 指定查询条数
    */
-  children(where: Where, childrenKey: string = 'children'): Array<DataItem> {
+  children(where: Where): Array<DataItem> {
     let item: DataItem;
     if (this.primaryKey in where && this.foreignKey in where) {
       item = Object.assign({}, where);
@@ -475,13 +463,16 @@ class DB extends Basis {
   /**
    * 查询所有子级数据，相对 children 方法，该方法会进行递归查询
    * @param where 
-   * @param limit 
+   * @param childrenKey 
    */
   childrenDeep(where: Where, childrenKey: string = 'children'): Array<DataItem> {
-    const deep = (query: Where): DataItem => {
-      const list = this.children(query, childrenKey);
+    const deep = (query: Where): Array<DataItem> => {
+      const list = this.children(query);
       for(const item of list) {
-        item[childrenKey] = deep(item as Where);
+        const array = deep(item as Where);
+        if (array && array.length) {
+          item[childrenKey] = array
+        }
       }
       return list;
     };
@@ -490,7 +481,10 @@ class DB extends Basis {
       const data = Object.assign({}, item);
       const query: Where = {};
       query[this.primaryKey] = data[this.primaryKey];
-      data[childrenKey] = deep(query)
+      const array = deep(query);
+      if (array && array.length) {
+        data[childrenKey] = array
+      }
       result.push(data);
     }
     return result;
@@ -498,7 +492,6 @@ class DB extends Basis {
   /**
    * 查询父级数据，与 children 方法进行相反方向查询
    * @param where 
-   * @param limit 
    */
   parent(where: Where): DataItem {
     if (this.foreignKey in where) {
@@ -518,7 +511,7 @@ class DB extends Basis {
   /**
    * 查询所有父级数据，与 childrenDeep 方法进行相反方向查询
    * @param where 
-   * @param limit 
+   * @param parentKey 
    */
   parentDeep(where: Where, parentKey: string = 'parent'): Array<DataItem> {
     const result: Array<DataItem> = []
@@ -531,7 +524,10 @@ class DB extends Basis {
     }
     for(const item of this.select(where)) {
       const data = Object.assign({}, item);
-      data[parentKey] = deep(data);
+      const parent = deep(data);
+      if (parent) {
+        data[parentKey] = parent
+      }
       result.push(data);
     }
     return result;

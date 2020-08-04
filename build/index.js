@@ -480,22 +480,13 @@ var Basis = (function () {
 }());
 var DB = (function (_super) {
     __extends(DB, _super);
-    function DB(name, list, primaryKey, foreignKey, foreignKeyValue) {
-        if (name === void 0) { name = UUid(); }
+    function DB(list, primaryKey, foreignKey, foreignKeyValue) {
         if (list === void 0) { list = []; }
         if (primaryKey === void 0) { primaryKey = 'id'; }
         if (foreignKey === void 0) { foreignKey = 'pid'; }
         if (foreignKeyValue === void 0) { foreignKeyValue = '0'; }
-        var _this = _super.call(this, list, primaryKey, foreignKey, foreignKeyValue) || this;
-        _this.setName(name);
-        return _this;
+        return _super.call(this, list, primaryKey, foreignKey, foreignKeyValue) || this;
     }
-    DB.prototype.setName = function (name) {
-        this.name = name;
-    };
-    DB.prototype.getName = function () {
-        return this.name;
-    };
     DB.prototype.selectOne = function (where) {
         var _a = __read(this.select(where, 1), 1), data = _a[0];
         return data;
@@ -540,8 +531,7 @@ var DB = (function (_super) {
         deep(list, this.foreignKeyValue);
         return data;
     };
-    DB.prototype.children = function (where, childrenKey) {
-        if (childrenKey === void 0) { childrenKey = 'children'; }
+    DB.prototype.children = function (where) {
         var item;
         if (this.primaryKey in where && this.foreignKey in where) {
             item = Object.assign({}, where);
@@ -562,11 +552,14 @@ var DB = (function (_super) {
         if (childrenKey === void 0) { childrenKey = 'children'; }
         var deep = function (query) {
             var e_16, _a;
-            var list = _this.children(query, childrenKey);
+            var list = _this.children(query);
             try {
                 for (var list_2 = __values(list), list_2_1 = list_2.next(); !list_2_1.done; list_2_1 = list_2.next()) {
                     var item = list_2_1.value;
-                    item[childrenKey] = deep(item);
+                    var array = deep(item);
+                    if (array && array.length) {
+                        item[childrenKey] = array;
+                    }
                 }
             }
             catch (e_16_1) { e_16 = { error: e_16_1 }; }
@@ -585,7 +578,10 @@ var DB = (function (_super) {
                 var data = Object.assign({}, item);
                 var query = {};
                 query[this.primaryKey] = data[this.primaryKey];
-                data[childrenKey] = deep(query);
+                var array = deep(query);
+                if (array && array.length) {
+                    data[childrenKey] = array;
+                }
                 result.push(data);
             }
         }
@@ -630,7 +626,10 @@ var DB = (function (_super) {
             for (var _b = __values(this.select(where)), _c = _b.next(); !_c.done; _c = _b.next()) {
                 var item = _c.value;
                 var data = Object.assign({}, item);
-                data[parentKey] = deep(data);
+                var parent = deep(data);
+                if (parent) {
+                    data[parentKey] = parent;
+                }
                 result.push(data);
             }
         }

@@ -39,11 +39,7 @@ declare class Basis {
 }
 
 declare class DB extends Basis {
-  constructor(name?: string, list?: any[], primaryKey?: string, foreignKey?: string)
-  /**
-   * 查询对象名称
-   */
-  getName(): string
+  constructor(list?: any[], primaryKey?: string, foreignKey?: string)
   /**
    * 匹配查询且只返回第一条结果
    * @param where 要查询的条件
@@ -81,27 +77,25 @@ declare class DB extends Basis {
   /**
    * 查询元素子级数据
    * @param where 查询条件
-   * @param limit 指定查询条数
    */
   children(where: Where) : Array<DataItem>
   /**
    * 查询所有子级数据，相对 children 方法，该方法会进行递归查询
    * @param where 
-   * @param limit 
+   * @param childrenKey  子级数据的键名
    */
-  childrenDeep(where: Where): Array<DataItem>
+  childrenDeep(where: Where, childrenKey?: string): Array<DataItem>
   /**
    * 查询父级数据，与 children 方法进行相反方向查询
    * @param where 
-   * @param limit 
    */
   parent(where: Where): Array<DataItem>
   /**
-   * 查询所有父级数据，与 与 childrenDeep 方法进行相反方向查询
+   * 查询所有父级数据，与 childrenDeep 方法进行相反方向查询
    * @param where 
-   * @param limit 
+   * @param parentKey  父级数据的键名
    */
-  parentDeep(where: Where, limit?: number): Array<DataItem>
+  parentDeep(where: Where, parentKey?: string): Array<DataItem>
 }
 
 export = DB;
