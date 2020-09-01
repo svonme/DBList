@@ -156,7 +156,8 @@ var Basis = (function () {
                             continue;
                         }
                         if (limit === 0) {
-                            result.push.apply(result, __spread(map.values()));
+                            var list = map.values();
+                            result.push.apply(result, __spread(list));
                         }
                         else {
                             try {

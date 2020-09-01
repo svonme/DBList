@@ -38,7 +38,7 @@ class Basis {
     this.data.set(this.unknownKey, new Map());
     this.insert(list);
   }
-  size() {
+  size(): number {
     let number = 0;
     this.data.forEach(map => {
       number += map.size;
@@ -111,7 +111,7 @@ class Basis {
    * @param where  要查询的条件
    * @param link   是否模糊查询
    */
-  Matcher(where: Where, like: boolean = false) {
+  Matcher(where: Where, like: boolean = false): Function {
     return (value: DataItem) => {
       if (!value) {
         return false;
@@ -126,10 +126,10 @@ class Basis {
    * 查询所有
    * @param limit 
    */
-  private whereAll(limit: number = 0): Array<DataItem> {
-    const result: Array<DataItem> = [];
+  private whereAll<T extends DataItem>(limit: number = 0): T[] {
+    const result: Array<T> = [];
     this.data.forEach(map => {
-      map.forEach(item => {
+      map.forEach((item: T) => {
         result.push(item);
       });
     });
@@ -142,13 +142,13 @@ class Basis {
    * @param data  查询的数据
    * @param like  是否模糊查询
    */
-  Where(where: Where = {}, limit: number = 0, like: boolean): Array<DataItem> {
+  Where<T extends DataItem>(where: Where = {}, limit: number = 0, like: boolean): T[] {
     const keys = Object.keys(where);
     if (keys.length === 0) {
       return this.whereAll(limit);
     }
     let flag = true;
-    let result: Array<DataItem> = [];
+    let result: Array<T> = [];
     // 主外键查询
     if (keys.length === 1 && !like) {
       // 外键查询
@@ -160,10 +160,11 @@ class Basis {
             continue;
           }
           if (limit === 0) {
-            result.push(...map.values());
+            const list: T[] = map.values() as any
+            result.push(...list);
           } else {
             for(const item of map.values()) {
-              result.push(item);
+              result.push(item as T);
               // 假如查询数据长度达到限制
               if (result.length >= limit) {
                 flag = false;
@@ -182,7 +183,7 @@ class Basis {
         const primaryKeys = [].concat(where[this.primaryKey]);
         for(const key of primaryKeys) {
           for(const map of this.data.values()) {
-            const value = map.get(key);
+            const value: T = map.get(key) as T;
             if (value) {
               result.push(value);
             }
@@ -203,7 +204,7 @@ class Basis {
     for(const key of this.data.keys()) {
       const map = this.data.get(key);
       for(const index of map.keys()) {
-        const item = map.get(index);
+        const item: T = map.get(index) as T;
         const status = item ? match(item) : false;
         if (status) {
           result.push(item);
@@ -225,16 +226,16 @@ class Basis {
    * @param where 要查询的条件
    * @param limit 限定查询结果条数
    */
-  like(where: Where, limit?: number): Array<DataItem> {
-    return this.Where(where, limit, true);
+  like<T extends DataItem>(where: Where, limit?: number): T[] {
+    return this.Where<T>(where, limit, true);
   }
   /**
    * 匹配查询
    * @param where 要查询的条件
    * @param limit 限定查询结果条数
    */
-  select(where?: Where, limit?: number): Array<DataItem> {
-    return this.Where(where, limit, false);
+  select<T extends DataItem>(where?: Where, limit?: number): T[] {
+    return this.Where<T>(where, limit, false);
   }
   /**
    * 添加数据
@@ -269,7 +270,7 @@ class Basis {
   /**
    * 修改数据中的主键
    */
-  private _updatePrimaryKey(originKey: string | number, newKey: string | number) {
+  private _updatePrimaryKey(originKey: string | number, newKey: string | number): void {
     const foreignKeys = this.data.keys();
     for(const foreignKey of foreignKeys) {
       const map = this.data.get(foreignKey);
@@ -283,7 +284,7 @@ class Basis {
   /**
    * 修改数据中的外键
    */
-  private _updateforeignKey(originKey: string | number, newKey: string | number) {
+  private _updateforeignKey(originKey: string | number, newKey: string | number): void {
     if (this.data.has(originKey)) {
       const map = this.data.get(originKey);
       for(const key of map.keys()) {
@@ -311,7 +312,7 @@ class Basis {
     const primaryKeyHooks: DataItem = {};
     const foreignKeyHooks: DataItem = {};
     // 查询需要修改的数据
-    const originList = this.select(where);
+    const originList = this.select<DataItem>(where);
     for (const origin of originList) {
       const key = origin[this.primaryKey];
       // 新数据
@@ -370,7 +371,7 @@ class Basis {
       return 0;
     }
     let count = 0;
-    const list = this.select(where);
+    const list = this.select<DataItem>(where);
     for(const item of list) {
       const id = item[this.primaryKey];
       for(const map of this.data.values()) {
@@ -398,18 +399,18 @@ class DB extends Basis {
     }
     super(list, primaryKey, foreignKey, foreignKeyValue);
   }
-  selectOne(where: Where): DataItem {
-    const [ data ]: Array<DataItem> = this.select(where, 1);
+  selectOne<T extends DataItem>(where: Where): T {
+    const [ data ]: T[] = this.select<T>(where, 1);
     return data;
   }
   /**
    * 复制一份数据
    * @param callback 可以对每一个元素作处理
    */
-  clone(callback: Function): Array<DataItem> {
-    const array = this.select();
+  clone<T extends DataItem>(callback: Function): T[] {
+    const array: T[] = this.select<T>();
     if (callback) {
-      const list: Array<DataItem> = [];
+      const list: T[] = [];
       for (let i = 0, len = array.length; i < len; i++) {
         const value = callback(Object.assign({}, array[i]));
         if (value) {
@@ -421,11 +422,11 @@ class DB extends Basis {
     return array;
   }
   /** 以下法必须配置 primaryKey & foreignKey */
-  flatten(list: Array<DataItem>, childrenKey: string): Array<DataItem> {
-    const data: Array<DataItem> = [];
-    const deep = (array: Array<DataItem>, foreignKey: string | number) => {
+  flatten<T extends DataItem>(list: T[], childrenKey: string): T[] {
+    const data: T[] = [];
+    const deep = (array: T[], foreignKey: string | number): void => {
       for (let i = 0, len = array.length; i < len; i++) {
-        const item = array[i];
+        const item: DataItem = array[i];
         // 判断主键是否存在
         if (!(this.primaryKey in item)) {
           item[this.primaryKey] = UUid();
@@ -452,17 +453,17 @@ class DB extends Basis {
    * 查询元素子级数据
    * @param where 查询条件
    */
-  children(where: Where): Array<DataItem> {
-    let item: DataItem;
+  children<T extends DataItem>(where: Where): T[] {
+    let item: T;
     if (this.primaryKey in where && this.foreignKey in where) {
-      item = Object.assign({}, where);
+      item = Object.assign({}, where) as T;
     } else {
-      item = Object.assign({}, this.selectOne(where));
+      item = Object.assign({}, this.selectOne<T>(where)) as T;
     }
     if (item) {
       const childrenWhere: Where = {};
       childrenWhere[this.foreignKey] = item[this.primaryKey];
-      return _.map(this.select(childrenWhere), (data: DataItem) => _.clone(data));
+      return _.map(this.select<T>(childrenWhere), (data: DataItem) => _.clone(data));
     }
     return [];
   }
@@ -471,9 +472,9 @@ class DB extends Basis {
    * @param where 
    * @param childrenKey 
    */
-  childrenDeep(where: Where, childrenKey: string = 'children'): Array<DataItem> {
+  childrenDeep<T extends DataItem>(where: Where, childrenKey: string = 'children'): T[] {
     const deep = (query: Where): Array<DataItem> => {
-      const list = this.children(query);
+      const list: any = this.children<T>(query);
       for(const item of list) {
         const array = deep(item as Where);
         if (array && array.length) {
@@ -482,16 +483,16 @@ class DB extends Basis {
       }
       return list;
     };
-    const result: Array<DataItem> = [];
-    for(const item of this.select(where)) {
-      const data = Object.assign({}, item);
+    const result: T[] = [];
+    for(const item of this.select<T>(where)) {
+      const data: DataItem = Object.assign({}, item);
       const query: Where = {};
       query[this.primaryKey] = data[this.primaryKey];
       const array = deep(query);
       if (array && array.length) {
         data[childrenKey] = array
       }
-      result.push(data);
+      result.push(data as T);
     }
     return result;
   }
@@ -499,18 +500,18 @@ class DB extends Basis {
    * 查询父级数据，与 children 方法进行相反方向查询
    * @param where 
    */
-  parent(where: Where): DataItem {
+  parent<T extends DataItem>(where: Where): T {
     if (this.foreignKey in where) {
       const parentWhere: Where = {};
       parentWhere[this.primaryKey] = where[this.foreignKey];
-      const value = this.selectOne(parentWhere)
+      const value: T = this.selectOne<T>(parentWhere)
       return value ? _.clone(value) : void 0;
     } else {
-      const item = this.selectOne(where);
+      const item = this.selectOne<T>(where);
       if (item) {
         const parentWhere: Where = {};
         parentWhere[this.primaryKey] = item[this.foreignKey];
-        const value = this.selectOne(parentWhere)
+        const value: T = this.selectOne<T>(parentWhere)
         return value ? _.clone(value) : void 0;
       }
       return void 0;
@@ -521,8 +522,8 @@ class DB extends Basis {
    * @param where 
    * @param parentKey 
    */
-  parentDeep(where: Where, parentKey: string = 'parent'): Array<DataItem> {
-    const result: Array<DataItem> = []
+  parentDeep<T extends DataItem>(where: Where, parentKey: string = 'parent'): T[] {
+    const result: T[] = []
     const deep = (where: Where): DataItem => {
       const parent = this.parent(where);
       if (parent) {
@@ -531,12 +532,12 @@ class DB extends Basis {
       return parent;
     }
     for(const item of this.select(where)) {
-      const data = Object.assign({}, item);
+      const data: DataItem = Object.assign({}, item);
       const parent = deep(data);
       if (parent) {
         data[parentKey] = parent
       }
-      result.push(data);
+      result.push(data as T);
     }
     return result;
   }
