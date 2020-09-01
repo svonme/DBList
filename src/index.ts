@@ -541,6 +541,19 @@ class DB extends Basis {
     }
     return result;
   }
+  /**
+   * 查询兄弟元素
+   * @param where 
+   */
+  siblings<T extends DataItem>(where: Where): T[] {
+    const item = this.selectOne<T>(where);
+    if (item) {
+      const query: Where = {};
+      query[this.foreignKey] = item[this.foreignKey];
+      return this.select<T>(query);
+    }
+    return void 0;
+  }
 }
 
 module.exports = DB;

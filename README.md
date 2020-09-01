@@ -399,3 +399,19 @@ db.select(where, 1)
   { id: 5, value: '重庆' }
 ]
 ```
+
+
+## siblings
+
+根据条件的匹配接口查询其兄弟元素
+
+```
+const where = { id: 5 }
+
+db.siblings(where) 
+
+[
+  ...
+]
+
+```

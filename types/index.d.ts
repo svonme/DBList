@@ -73,7 +73,7 @@ declare class DB extends Basis {
    *  }
    * ]
    */
-  flatten<T>(list: Array<DataItem>, childrenKey: string): T[]
+  flatten<T>(list: Array<DataItem>, childrenKey?: string): T[]
   /**
    * 查询元素子级数据
    * @param where 查询条件
@@ -96,6 +96,11 @@ declare class DB extends Basis {
    * @param parentKey  父级数据的键名
    */
   parentDeep<T>(where: Where, parentKey?: string): T[]
+  /**
+   * 查询兄弟元素
+   * @param where 
+   */
+  siblings<T>(where: Where): T[]
 }
 
 export = DB;
