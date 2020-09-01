@@ -654,6 +654,15 @@ var DB = (function (_super) {
         }
         return result;
     };
+    DB.prototype.siblings = function (where) {
+        var item = this.selectOne(where);
+        if (item) {
+            var query = {};
+            query[this.foreignKey] = item[this.foreignKey];
+            return this.select(query);
+        }
+        return void 0;
+    };
     return DB;
 }(Basis));
 module.exports = DB;
