@@ -42,7 +42,19 @@ var __spread = (this && this.__spread) || function () {
     for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
     return ar;
 };
-var _ = require('lodash');
+var _ = {
+    'keys': require('lodash/keys'),
+    'includes': require('lodash/includes'),
+    'isArray': require('lodash/isArray'),
+    'isString': require('lodash/isString'),
+    'isObject': require('lodash/isObject'),
+    'size': require('lodash/size'),
+    'intersection': require('lodash/intersection'),
+    'difference': require('lodash/difference'),
+    'omit': require('lodash/omit'),
+    'map': require('lodash/map'),
+    'clone': require('lodash/clone')
+};
 var _UUIDIndex = 1;
 function UUid() {
     var id = "DBList_" + _UUIDIndex++;

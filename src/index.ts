@@ -3,7 +3,19 @@
  * @author svon.me@gmail.com
  */
 
-const _ = require('lodash');
+const _ = {
+  'keys': require('lodash/keys'),
+  'includes': require('lodash/includes'),
+  'isArray': require('lodash/isArray'),
+  'isString': require('lodash/isString'),
+  'isObject': require('lodash/isObject'),
+  'size': require('lodash/size'),
+  'intersection': require('lodash/intersection'),
+  'difference': require('lodash/difference'),
+  'omit': require('lodash/omit'),
+  'map': require('lodash/map'),
+  'clone': require('lodash/clone'),
+}
 
 interface DataItem {
   [key: string]: any;
