@@ -378,6 +378,9 @@ var Basis = (function () {
                                     var temp = this.data.get(value[this.foreignKey]);
                                     temp.set(key, Object.assign({}, origin, value));
                                 }
+                                else {
+                                    map.set(key, Object.assign({}, origin, value));
+                                }
                             }
                             else {
                                 map.set(key, Object.assign({}, origin, value));
@@ -491,7 +494,7 @@ var DB = (function (_super) {
             console.warn('Dblist has removed the name field in version 0.2.4');
             list = primaryKey;
             primaryKey = foreignKey;
-            foreignKey = foreignKeyValue;
+            foreignKey = String(foreignKeyValue);
             foreignKeyValue = '0';
         }
         _this = _super.call(this, list, primaryKey, foreignKey, foreignKeyValue) || this;
@@ -604,6 +607,14 @@ var DB = (function (_super) {
         }
         return result;
     };
+    DB.prototype.childrenDeepFlatten = function (where, childrenKey) {
+        if (childrenKey === void 0) { childrenKey = 'children'; }
+        var result = this.childrenDeep(where, childrenKey);
+        var db = new DB([], this.primaryKey, this.foreignKey, this.foreignKeyValue);
+        var array = db.flatten(result, childrenKey);
+        db.insert(array);
+        return db.clone();
+    };
     DB.prototype.parent = function (where) {
         if (this.foreignKey in where) {
             var parentWhere = {};
@@ -653,6 +664,14 @@ var DB = (function (_super) {
             finally { if (e_17) throw e_17.error; }
         }
         return result;
+    };
+    DB.prototype.parentDeepFlatten = function (where, childrenKey) {
+        if (childrenKey === void 0) { childrenKey = 'children'; }
+        var result = this.parentDeep(where, childrenKey);
+        var db = new DB([], this.primaryKey, this.foreignKey, this.foreignKeyValue);
+        var array = db.flatten(result, childrenKey);
+        db.insert(array);
+        return db.clone();
     };
     DB.prototype.siblings = function (where) {
         var item = this.selectOne(where);

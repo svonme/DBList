@@ -1,18 +1,41 @@
 
 const DB = require('../build/index.js');
 
-const list = require('./test.json');
+// const list = require('./test.json');
 // console.log(list);
 
-const db = new DB('test', [], 'id', 'pid', 0);
+const list = [
+    {
+        id: '101',
+        name: 'aaa12313'
+    }, {
+        id: '102',
+        name: 'hjklsdas'
+    }
+]
 
-const test = db.flatten(list, 'children')
+const db = new DB(list);
+
+// const test = db.flatten(list, 'children')
 
 
-db.insert(test);
+// db.insert(test);
 
 
-const data = db.parentDeep({ id: '104' });
+const where = { id: '101' }
+
+console.log(JSON.stringify(db.select(where), null, 2));
+
+db.update(where, {
+    name: '你好'
+})
+
+console.log(JSON.stringify(db.select(where), null, 2));
+
+
+console.log(db.data)
+
+// const data = db.parentDeep();
 
 
 // const data = db.childrenDeep({ id: '100' });
@@ -22,4 +45,5 @@ const data = db.parentDeep({ id: '104' });
 // console.log('time : %s', (end - start) / 1000);
 
 
-console.log(JSON.stringify(data, null, 2));
+
+// console.log(JSON.stringify(data, null, 2));

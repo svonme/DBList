@@ -415,3 +415,11 @@ db.siblings(where)
 ]
 
 ```
+
+## childrenDeepFlatten
+  childrenDeep + flatten
+  把 childrenDeep 的数据做降维处理 
+
+## parentDeepFlatten
+  parentDeep + flatten
+  把 parentDeep 的结果做降维处理

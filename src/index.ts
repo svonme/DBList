@@ -29,7 +29,7 @@ class Basis {
   /** 第一层外键值 */
   protected foreignKeyValue: string | number;
   private unknownKey: string;
-  constructor(list: Array<DataItem>, primaryKey: string, foreignKey: string, foreignKeyValue: string) {
+  constructor(list: Array<DataItem>, primaryKey: string, foreignKey: string, foreignKeyValue: string | number) {
     this.data = new Map();
     this.primaryKey = primaryKey;
     this.foreignKey = foreignKey;
@@ -320,7 +320,7 @@ class Basis {
         const map = this.data.get(foreignKey);
         if(map.has(key)) {
           if (foreignKey === this.unknownKey) {
-            // 如果外键发生变化
+            // 新数据中如果有外键
             if (this.foreignKey in value) {
               // 删除数据
               map.delete(key);
@@ -331,6 +331,8 @@ class Basis {
               // 添加数据
               const temp = this.data.get(value[this.foreignKey]);
               temp.set(key, Object.assign({}, origin, value));
+            } else {
+              map.set(key, Object.assign({}, origin, value));
             }
           } else {
             map.set(key, Object.assign({}, origin, value));
@@ -388,13 +390,13 @@ class Basis {
 
 
 class DB extends Basis {
-  constructor(list: Array<DataItem> = [], primaryKey: string = 'id', foreignKey: string = 'pid', foreignKeyValue: string = '0') {
+  constructor(list: Array<DataItem> = [], primaryKey: string = 'id', foreignKey: string = 'pid', foreignKeyValue: string | number = '0') {
     // 如果第一个参数为字符串，则为无效参数（旧版本有该参数，0.2.4版本时已取消）
     if (_.isString(list)) {
       console.warn('Dblist has removed the name field in version 0.2.4');
       list = primaryKey as any
       primaryKey = foreignKey
-      foreignKey = foreignKeyValue
+      foreignKey = String(foreignKeyValue)
       foreignKeyValue = '0'
     }
     super(list, primaryKey, foreignKey, foreignKeyValue);
@@ -407,7 +409,7 @@ class DB extends Basis {
    * 复制一份数据
    * @param callback 可以对每一个元素作处理
    */
-  clone<T extends DataItem>(callback: Function): T[] {
+  clone<T extends DataItem>(callback?: Function): T[] {
     const array: T[] = this.select<T>();
     if (callback) {
       const list: T[] = [];
@@ -497,6 +499,18 @@ class DB extends Basis {
     return result;
   }
   /**
+   * childrenDeep + Flatten 组合
+   * @param list 
+   * @param childrenKey 
+   */
+  childrenDeepFlatten<T extends DataItem>(where: Where, childrenKey: string = 'children'): T[] {
+    const result = this.childrenDeep(where, childrenKey);
+    const db = new DB([], this.primaryKey, this.foreignKey, this.foreignKeyValue);
+    const array = db.flatten(result, childrenKey);
+    db.insert(array);
+    return db.clone<T>()
+  }
+  /**
    * 查询父级数据，与 children 方法进行相反方向查询
    * @param where 
    */
@@ -540,6 +554,18 @@ class DB extends Basis {
       result.push(data as T);
     }
     return result;
+  }
+  /**
+   * parentDeep + Flatten 组合
+   * @param list 
+   * @param childrenKey 
+   */
+  parentDeepFlatten<T extends DataItem>(where: Where, childrenKey: string = 'children'): T[] {
+    const result = this.parentDeep(where, childrenKey);
+    const db = new DB([], this.primaryKey, this.foreignKey, this.foreignKeyValue);
+    const array = db.flatten(result, childrenKey);
+    db.insert(array);
+    return db.clone<T>()
   }
   /**
    * 查询兄弟元素
