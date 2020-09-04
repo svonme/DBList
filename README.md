@@ -403,7 +403,7 @@ db.select(where, 1)
 
 ## siblings
 
-根据条件的匹配接口查询其兄弟元素
+根据条件的匹配结果查询其兄弟元素
 
 ```
 const where = { id: 5 }
