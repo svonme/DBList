@@ -429,7 +429,9 @@ db.siblings(where)
   清空所有数据
 
 ## empty
-  const where = { xxx }
-  db.empty(where)
-  
   清空元素几节点上的数据，只保留 primaryKey & foreignKey 属性
+
+```
+const where = { xxx }
+db.empty(where)
+```
