@@ -15,8 +15,9 @@ db.insert(test);
 // const data = db.parentDeep({ id: '104' });
 
 
+db.empty({id: '102'})
 
-const data = db.select({ name: '张三' });
+const data = db.clone();
 
 
 

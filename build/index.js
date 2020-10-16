@@ -42,19 +42,7 @@ var __spread = (this && this.__spread) || function () {
     for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
     return ar;
 };
-var _ = {
-    'keys': require('lodash/keys'),
-    'includes': require('lodash/includes'),
-    'isArray': require('lodash/isArray'),
-    'isString': require('lodash/isString'),
-    'isObject': require('lodash/isObject'),
-    'size': require('lodash/size'),
-    'intersection': require('lodash/intersection'),
-    'difference': require('lodash/difference'),
-    'omit': require('lodash/omit'),
-    'map': require('lodash/map'),
-    'clone': require('lodash/clone')
-};
+var _ = require('lodash');
 var _UUIDIndex = 1;
 function UUid() {
     var id = "DBList_" + _UUIDIndex++;
@@ -62,7 +50,10 @@ function UUid() {
     return id + "_" + key;
 }
 var Basis = (function () {
-    function Basis(list, primaryKey, foreignKey, foreignKeyValue) {
+    function Basis(list, primaryKey, foreignKey, foreignKeyValue, indexName) {
+        if (indexName === void 0) { indexName = 'dbIndex'; }
+        this.index = 1;
+        this.indexName = indexName || '__index';
         this.data = new Map();
         this.primaryKey = primaryKey;
         this.foreignKey = foreignKey;
@@ -77,6 +68,9 @@ var Basis = (function () {
             number += map.size;
         });
         return number;
+    };
+    Basis.prototype.getIndex = function () {
+        return this.index++;
     };
     Basis.prototype.IsMatchLike = function (data, where) {
         var keys = _.keys(where);
@@ -288,7 +282,8 @@ var Basis = (function () {
         return this.Where(where, limit, true);
     };
     Basis.prototype.select = function (where, limit) {
-        return this.Where(where, limit, false);
+        var array = this.Where(where, limit, false);
+        return _.sortBy(array, [this.indexName]);
     };
     Basis.prototype.insert = function (row) {
         if (!row) {
@@ -299,6 +294,9 @@ var Basis = (function () {
             var item = list[i];
             if (!item.hasOwnProperty(this.primaryKey)) {
                 item[this.primaryKey] = UUid();
+            }
+            if (!item.hasOwnProperty(this.indexName)) {
+                item[this.indexName] = this.getIndex();
             }
             if (item.hasOwnProperty(this.foreignKey)) {
                 var _a = __read([].concat(item[this.foreignKey]), 1), pid = _a[0];
@@ -492,6 +490,11 @@ var Basis = (function () {
         }
         return count;
     };
+    Basis.prototype.clear = function () {
+        var data = new Map();
+        data.set(this.unknownKey, new Map());
+        this.data = data;
+    };
     return Basis;
 }());
 var DB = (function (_super) {
@@ -515,6 +518,18 @@ var DB = (function (_super) {
     DB.prototype.selectOne = function (where) {
         var _a = __read(this.select(where, 1), 1), data = _a[0];
         return data;
+    };
+    DB.prototype.empty = function (where) {
+        var item = this.selectOne(where);
+        if (item) {
+            var value = _.pick(item, [this.primaryKey, this.foreignKey, this.indexName]);
+            var map = this.data.get(item[this.foreignKey]);
+            console.log(value);
+            console.log(item);
+            map.set(item[this.primaryKey], value);
+            return value;
+        }
+        return void 0;
     };
     DB.prototype.clone = function (callback) {
         var array = this.select();

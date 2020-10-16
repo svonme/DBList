@@ -3,19 +3,7 @@
  * @author svon.me@gmail.com
  */
 
-const _ = {
-  'keys': require('lodash/keys'),
-  'includes': require('lodash/includes'),
-  'isArray': require('lodash/isArray'),
-  'isString': require('lodash/isString'),
-  'isObject': require('lodash/isObject'),
-  'size': require('lodash/size'),
-  'intersection': require('lodash/intersection'),
-  'difference': require('lodash/difference'),
-  'omit': require('lodash/omit'),
-  'map': require('lodash/map'),
-  'clone': require('lodash/clone'),
-}
+const _ = require('lodash');
 
 interface DataItem {
   [key: string]: any;
@@ -41,7 +29,11 @@ class Basis {
   /** 第一层外键值 */
   protected foreignKeyValue: string | number;
   private unknownKey: string;
-  constructor(list: Array<DataItem>, primaryKey: string, foreignKey: string, foreignKeyValue: string | number) {
+  private index: number;
+  protected indexName: string;
+  constructor(list: Array<DataItem>, primaryKey: string, foreignKey: string, foreignKeyValue: string | number, indexName: string = 'dbIndex') {
+    this.index = 1;
+    this.indexName = indexName || '__index';
     this.data = new Map();
     this.primaryKey = primaryKey;
     this.foreignKey = foreignKey;
@@ -57,6 +49,10 @@ class Basis {
     })
     return number;
   }
+  getIndex (): number {
+    return this.index++;
+  }
+
   /**
    * 模糊匹配查询
    * @param data   匹配数据
@@ -88,10 +84,8 @@ class Basis {
   IsMatch(data: DataItem, where: Where): boolean {
     const keys: string[] = _.keys(where);
     let status = true;
-
     for (let i = 0, length = keys.length; i < length; i++) {
       const key = keys[i]; // 判断其中一个结果是否为数组
-
       if (_.isArray(where[key])) {
         // 如果列表数据存与查询数据集合中其中一个匹配，则证明单次比对成功
         if (_.includes(where[key], data[key])) {
@@ -247,7 +241,8 @@ class Basis {
    * @param limit 限定查询结果条数
    */
   select<T extends DataItem>(where?: Where, limit?: number): T[] {
-    return this.Where<T>(where, limit, false);
+    const array: T[] = this.Where<T>(where, limit, false);
+    return _.sortBy(array, [this.indexName]) as T[];
   }
   /**
    * 添加数据
@@ -263,6 +258,10 @@ class Basis {
       // 判断是否存在主健
       if (!item.hasOwnProperty(this.primaryKey) ) {
         item[this.primaryKey] = UUid();
+      }
+      // 判断是否有排序字段
+      if (!item.hasOwnProperty(this.indexName)) {
+        item[this.indexName] = this.getIndex();
       }
       if (item.hasOwnProperty(this.foreignKey)) {
         const [pid] = [].concat(item[this.foreignKey]);
@@ -397,6 +396,12 @@ class Basis {
     }
     return count;
   }
+  /** 清空整个 DB 数据 */
+  clear (): void {
+    const data = new Map();
+    data.set(this.unknownKey, new Map());
+    this.data = data
+  }
 }
 
 
@@ -416,6 +421,19 @@ class DB extends Basis {
   selectOne<T extends DataItem>(where: Where): T {
     const [ data ]: T[] = this.select<T>(where, 1);
     return data;
+  }
+  /** 清空某元素数据，只保留 primaryKey & foreignKey 属性 */
+  empty<T extends DataItem>(where: Where): T {
+    const item: T = this.selectOne(where);
+    if (item) {
+      const value: T = _.pick(item, [this.primaryKey, this.foreignKey, this.indexName]);
+      const map = this.data.get(item[this.foreignKey]);
+      console.log(value);
+      console.log(item);
+      map.set(item[this.primaryKey], value);
+      return value;
+    }
+    return void 0;
   }
   /**
    * 复制一份数据
