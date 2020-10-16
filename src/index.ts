@@ -379,12 +379,12 @@ class Basis {
    * 删除数据
    * @param where 需要删除的数据的查询条件
    */
-  remove(where: Where): number {
+  remove<T extends DataItem>(where: Where): number {
     if (_.keys(where).length < 1) {
       return 0;
     }
     let count = 0;
-    const list = this.select<DataItem>(where);
+    const list = this.select<T>(where);
     for(const item of list) {
       const id = item[this.primaryKey];
       for(const map of this.data.values()) {
@@ -401,6 +401,17 @@ class Basis {
     const data = new Map();
     data.set(this.unknownKey, new Map());
     this.data = data
+  }
+  /** 清空某元素数据，只保留 primaryKey & foreignKey 属性 */
+  empty<T extends DataItem>(where: Where): void {
+    const array: T[] = this.select(where);
+    for(const item of array) {
+      const value: T = _.pick(item, [this.primaryKey, this.foreignKey, this.indexName]);
+      const map = this.data.get(item[this.foreignKey]);
+      console.log(value);
+      console.log(item);
+      map.set(item[this.primaryKey], value);
+    }
   }
 }
 
@@ -421,19 +432,6 @@ class DB extends Basis {
   selectOne<T extends DataItem>(where: Where): T {
     const [ data ]: T[] = this.select<T>(where, 1);
     return data;
-  }
-  /** 清空某元素数据，只保留 primaryKey & foreignKey 属性 */
-  empty<T extends DataItem>(where: Where): T {
-    const item: T = this.selectOne(where);
-    if (item) {
-      const value: T = _.pick(item, [this.primaryKey, this.foreignKey, this.indexName]);
-      const map = this.data.get(item[this.foreignKey]);
-      console.log(value);
-      console.log(item);
-      map.set(item[this.primaryKey], value);
-      return value;
-    }
-    return void 0;
   }
   /**
    * 复制一份数据

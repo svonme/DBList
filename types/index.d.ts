@@ -7,7 +7,7 @@ interface Where extends DataItem{
 }
 
 declare class Basis {
-  constructor(result?: any[])
+  constructor(list: Array<DataItem>, primaryKey: string, foreignKey: string, foreignKeyValue: string | number, indexName: string)
   /**
    * 模糊查询
    * @param where 要查询的条件
@@ -35,7 +35,16 @@ declare class Basis {
    * 删除数据
    * @param where 需要删除的数据的查询条件
    */
-  remove(where: Where): number
+  remove<T extends DataItem>(where: Where): number
+  /**
+   * 清空 DB 所有数据
+   */
+  clear (): void
+  /**
+   * 清空某元素数据，只保留 primaryKey & foreignKey 属性
+   * @param where 查询条件
+   */
+  empty<T extends DataItem>(where: Where): void
 }
 
 declare class DB extends Basis {

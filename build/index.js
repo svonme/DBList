@@ -495,6 +495,27 @@ var Basis = (function () {
         data.set(this.unknownKey, new Map());
         this.data = data;
     };
+    Basis.prototype.empty = function (where) {
+        var e_15, _a;
+        var array = this.select(where);
+        try {
+            for (var array_1 = __values(array), array_1_1 = array_1.next(); !array_1_1.done; array_1_1 = array_1.next()) {
+                var item = array_1_1.value;
+                var value = _.pick(item, [this.primaryKey, this.foreignKey, this.indexName]);
+                var map = this.data.get(item[this.foreignKey]);
+                console.log(value);
+                console.log(item);
+                map.set(item[this.primaryKey], value);
+            }
+        }
+        catch (e_15_1) { e_15 = { error: e_15_1 }; }
+        finally {
+            try {
+                if (array_1_1 && !array_1_1.done && (_a = array_1["return"])) _a.call(array_1);
+            }
+            finally { if (e_15) throw e_15.error; }
+        }
+    };
     return Basis;
 }());
 var DB = (function (_super) {
@@ -518,18 +539,6 @@ var DB = (function (_super) {
     DB.prototype.selectOne = function (where) {
         var _a = __read(this.select(where, 1), 1), data = _a[0];
         return data;
-    };
-    DB.prototype.empty = function (where) {
-        var item = this.selectOne(where);
-        if (item) {
-            var value = _.pick(item, [this.primaryKey, this.foreignKey, this.indexName]);
-            var map = this.data.get(item[this.foreignKey]);
-            console.log(value);
-            console.log(item);
-            map.set(item[this.primaryKey], value);
-            return value;
-        }
-        return void 0;
     };
     DB.prototype.clone = function (callback) {
         var array = this.select();
@@ -587,11 +596,11 @@ var DB = (function (_super) {
         return [];
     };
     DB.prototype.childrenDeep = function (where, childrenKey) {
-        var e_15, _a;
+        var e_16, _a;
         var _this = this;
         if (childrenKey === void 0) { childrenKey = 'children'; }
         var deep = function (query) {
-            var e_16, _a;
+            var e_17, _a;
             var list = _this.children(query);
             try {
                 for (var list_2 = __values(list), list_2_1 = list_2.next(); !list_2_1.done; list_2_1 = list_2.next()) {
@@ -602,12 +611,12 @@ var DB = (function (_super) {
                     }
                 }
             }
-            catch (e_16_1) { e_16 = { error: e_16_1 }; }
+            catch (e_17_1) { e_17 = { error: e_17_1 }; }
             finally {
                 try {
                     if (list_2_1 && !list_2_1.done && (_a = list_2["return"])) _a.call(list_2);
                 }
-                finally { if (e_16) throw e_16.error; }
+                finally { if (e_17) throw e_17.error; }
             }
             return list;
         };
@@ -625,12 +634,12 @@ var DB = (function (_super) {
                 result.push(data);
             }
         }
-        catch (e_15_1) { e_15 = { error: e_15_1 }; }
+        catch (e_16_1) { e_16 = { error: e_16_1 }; }
         finally {
             try {
                 if (_c && !_c.done && (_a = _b["return"])) _a.call(_b);
             }
-            finally { if (e_15) throw e_15.error; }
+            finally { if (e_16) throw e_16.error; }
         }
         return result;
     };
@@ -661,7 +670,7 @@ var DB = (function (_super) {
         }
     };
     DB.prototype.parentDeep = function (where, parentKey) {
-        var e_17, _a;
+        var e_18, _a;
         var _this = this;
         if (parentKey === void 0) { parentKey = 'parent'; }
         var result = [];
@@ -683,12 +692,12 @@ var DB = (function (_super) {
                 result.push(data);
             }
         }
-        catch (e_17_1) { e_17 = { error: e_17_1 }; }
+        catch (e_18_1) { e_18 = { error: e_18_1 }; }
         finally {
             try {
                 if (_c && !_c.done && (_a = _b["return"])) _a.call(_b);
             }
-            finally { if (e_17) throw e_17.error; }
+            finally { if (e_18) throw e_18.error; }
         }
         return result;
     };

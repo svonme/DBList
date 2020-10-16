@@ -194,6 +194,7 @@ new DBList(list, primaryKey, foreignKey)
 |  primaryKey | 否 | 主键 , 用于标识别当前数据 | "id" |
 |  foreignKey | 否 | 外键, 用于与哪条数据进行关联 | "pid" "
 |  fristForeignValue | 否 | 第一层外键的值 | "0" |
+|  indexName | 否 | 记录每一个数据的顺序 | Number |
 
 
 ### 测试数据
@@ -423,3 +424,11 @@ db.siblings(where)
 ## parentDeepFlatten
   parentDeep + flatten
   把 parentDeep 的结果做降维处理
+
+## clear
+  清空所有数据
+
+## empty
+  const where = { xxx }
+  db.empty(where)
+  清空元素几点上的数据，只保留 primaryKey & foreignKey 属性
