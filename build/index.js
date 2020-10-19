@@ -292,11 +292,12 @@ var Basis = (function () {
         var list = [].concat(row);
         for (var i = 0, len = list.length; i < len; i++) {
             var item = list[i];
+            var index = this.getIndex();
             if (!item.hasOwnProperty(this.primaryKey)) {
                 item[this.primaryKey] = UUid();
             }
             if (!item.hasOwnProperty(this.indexName)) {
-                item[this.indexName] = this.getIndex();
+                item[this.indexName] = index;
             }
             if (item.hasOwnProperty(this.foreignKey)) {
                 var _a = __read([].concat(item[this.foreignKey]), 1), pid = _a[0];

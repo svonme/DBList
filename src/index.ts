@@ -255,13 +255,14 @@ class Basis {
     const list = [].concat(row);
     for(let i = 0, len = list.length; i < len; i++){
       const item = list[i];
+      const index = this.getIndex();
       // 判断是否存在主健
       if (!item.hasOwnProperty(this.primaryKey) ) {
         item[this.primaryKey] = UUid();
       }
       // 判断是否有排序字段
       if (!item.hasOwnProperty(this.indexName)) {
-        item[this.indexName] = this.getIndex();
+        item[this.indexName] = index;
       }
       if (item.hasOwnProperty(this.foreignKey)) {
         const [pid] = [].concat(item[this.foreignKey]);
