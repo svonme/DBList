@@ -538,6 +538,9 @@ var DB = (function (_super) {
         return _this;
     }
     DB.prototype.selectOne = function (where) {
+        if (!where) {
+            throw "where cannot be undefined";
+        }
         var _a = __read(this.select(where, 1), 1), data = _a[0];
         return data;
     };
@@ -557,6 +560,9 @@ var DB = (function (_super) {
     };
     DB.prototype.flatten = function (list, childrenKey) {
         var _this = this;
+        if (!list) {
+            throw "list cannot be undefined";
+        }
         var data = [];
         var deep = function (array, foreignKey) {
             for (var i = 0, len = array.length; i < len; i++) {
@@ -582,6 +588,9 @@ var DB = (function (_super) {
         return data;
     };
     DB.prototype.children = function (where) {
+        if (!where) {
+            throw "where cannot be undefined";
+        }
         var item;
         if (this.primaryKey in where && this.foreignKey in where) {
             item = Object.assign({}, where);
@@ -622,6 +631,10 @@ var DB = (function (_super) {
             return list;
         };
         var result = [];
+        if (!where) {
+            where = {};
+            where[this.foreignKey] = this.foreignKeyValue;
+        }
         try {
             for (var _b = __values(this.select(where)), _c = _b.next(); !_c.done; _c = _b.next()) {
                 var item = _c.value;
@@ -653,6 +666,9 @@ var DB = (function (_super) {
         return db.clone();
     };
     DB.prototype.parent = function (where) {
+        if (!where) {
+            throw "where cannot be undefined";
+        }
         if (this.foreignKey in where) {
             var parentWhere = {};
             parentWhere[this.primaryKey] = where[this.foreignKey];
@@ -711,6 +727,9 @@ var DB = (function (_super) {
         return db.clone();
     };
     DB.prototype.siblings = function (where) {
+        if (!where) {
+            throw "where cannot be undefined";
+        }
         var item = this.selectOne(where);
         if (item) {
             var query = {};

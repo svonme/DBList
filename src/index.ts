@@ -431,6 +431,9 @@ class DB extends Basis {
     super(list, primaryKey, foreignKey, foreignKeyValue);
   }
   selectOne<T extends DataItem>(where: Where): T {
+    if (!where) {
+      throw "where cannot be undefined"
+    }
     const [ data ]: T[] = this.select<T>(where, 1);
     return data;
   }
@@ -454,6 +457,9 @@ class DB extends Basis {
   }
   /** 以下法必须配置 primaryKey & foreignKey */
   flatten<T extends DataItem>(list: T[], childrenKey: string): T[] {
+    if (!list) {
+      throw "list cannot be undefined"
+    }
     const data: T[] = [];
     const deep = (array: T[], foreignKey: string | number): void => {
       for (let i = 0, len = array.length; i < len; i++) {
@@ -485,6 +491,9 @@ class DB extends Basis {
    * @param where 查询条件
    */
   children<T extends DataItem>(where: Where): T[] {
+    if (!where) {
+      throw "where cannot be undefined"
+    }
     let item: T;
     if (this.primaryKey in where && this.foreignKey in where) {
       item = Object.assign({}, where) as T;
@@ -515,6 +524,10 @@ class DB extends Basis {
       return list;
     };
     const result: T[] = [];
+    if (!where) {
+      where = {};
+      where[this.foreignKey] = this.foreignKeyValue;
+    }
     for(const item of this.select<T>(where)) {
       const data: DataItem = Object.assign({}, item);
       const query: Where = {};
@@ -544,6 +557,9 @@ class DB extends Basis {
    * @param where 
    */
   parent<T extends DataItem>(where: Where): T {
+    if (!where) {
+      throw "where cannot be undefined"
+    }
     if (this.foreignKey in where) {
       const parentWhere: Where = {};
       parentWhere[this.primaryKey] = where[this.foreignKey];
@@ -601,6 +617,9 @@ class DB extends Basis {
    * @param where 
    */
   siblings<T extends DataItem>(where: Where): T[] {
+    if (!where) {
+      throw "where cannot be undefined"
+    }
     const item = this.selectOne<T>(where);
     if (item) {
       const query: Where = {};
