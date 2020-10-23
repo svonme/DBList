@@ -48,7 +48,6 @@ declare class Basis {
 }
 
 declare class DB extends Basis {
-  constructor(list?: any[], primaryKey?: string, foreignKey?: string)
   /**
    * 匹配查询且只返回第一条结果
    * @param where 要查询的条件
