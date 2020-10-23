@@ -7,7 +7,7 @@ interface Where extends DataItem{
 }
 
 declare class Basis {
-  constructor(list: Array<DataItem>, primaryKey: string, foreignKey: string, foreignKeyValue: string | number, indexName: string)
+  constructor(list?: Array<DataItem>, primaryKey?: string, foreignKey?: string, foreignKeyValue?: string | number, indexName?: string)
   /**
    * 模糊查询
    * @param where 要查询的条件
