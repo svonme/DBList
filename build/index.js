@@ -287,8 +287,9 @@ var Basis = (function () {
     };
     Basis.prototype.insert = function (row) {
         if (!row) {
-            return 0;
+            return void 0;
         }
+        var keys = [];
         var list = [].concat(row);
         for (var i = 0, len = list.length; i < len; i++) {
             var item = list[i];
@@ -299,6 +300,7 @@ var Basis = (function () {
             if (!item.hasOwnProperty(this.indexName)) {
                 item[this.indexName] = index;
             }
+            keys.push(item[this.primaryKey]);
             if (item.hasOwnProperty(this.foreignKey)) {
                 var _a = __read([].concat(item[this.foreignKey]), 1), pid = _a[0];
                 var map = this.data.get(pid);
@@ -313,7 +315,10 @@ var Basis = (function () {
                 map.set(item[this.primaryKey], item);
             }
         }
-        return list.length;
+        if (keys.length === 1) {
+            return keys[0];
+        }
+        return keys;
     };
     Basis.prototype._updatePrimaryKey = function (originKey, newKey) {
         var e_7, _a;

@@ -24,7 +24,7 @@ declare class Basis {
    * 添加数据
    * @param row
    */
-  insert(row: object): boolean
+  insert(row: object): number | string | Array<string | number>
   /**
    * 修改
    * @param where 需要修改的数据的查询条件

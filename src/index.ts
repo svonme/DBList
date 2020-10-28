@@ -248,10 +248,11 @@ class Basis {
    * 添加数据
    * @param row
    */
-  insert(row: DataItem | Array<DataItem>): number {
+  insert(row: DataItem | Array<DataItem>): number | string | Array<string | number> {
     if (!row) {
-      return 0;
+      return void 0;
     }
+    const keys: Array<string | number> = [];
     const list = [].concat(row);
     for(let i = 0, len = list.length; i < len; i++){
       const item = list[i];
@@ -264,6 +265,7 @@ class Basis {
       if (!item.hasOwnProperty(this.indexName)) {
         item[this.indexName] = index;
       }
+      keys.push(item[this.primaryKey]);
       if (item.hasOwnProperty(this.foreignKey)) {
         const [pid] = [].concat(item[this.foreignKey]);
         let map = this.data.get(pid);
@@ -277,7 +279,10 @@ class Basis {
         map.set(item[this.primaryKey], item);
       }
     }
-    return list.length;
+    if (keys.length === 1) {
+      return keys[0];
+    }
+    return keys;
   }
   /**
    * 修改数据中的主键

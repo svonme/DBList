@@ -97,7 +97,7 @@ db.select({ age: 19, hobby: '玩游戏' });
 ```
 const value = { id: 5, value: '重庆' }
 
-db.insert(value)
+const key = db.insert(value) // 返回该条元素的唯一键值
 ```
 
 添加多条数据
@@ -105,7 +105,7 @@ db.insert(value)
 ```
 const values = [{ id: 6, value: '上海' },  { id: 7, value: '天津' }]
 
-db.insert(values)
+const keys: Array<string | number> = db.insert(values) // 以数组形式返回所有元素的唯一键值
 ```
 
 
