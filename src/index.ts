@@ -409,8 +409,6 @@ class Basis {
     for(const item of array) {
       const value: T = _.pick(item, [this.primaryKey, this.foreignKey, this.indexName]);
       const map = this.data.get(item[this.foreignKey]);
-      console.log(value);
-      console.log(item);
       map.set(item[this.primaryKey], value);
     }
   }
@@ -432,7 +430,7 @@ class DB extends Basis {
   }
   selectOne<T extends DataItem>(where: Where): T {
     if (!where) {
-      throw "where cannot be undefined"
+      throw "function selectOne: where cannot be undefined"
     }
     const [ data ]: T[] = this.select<T>(where, 1);
     return data;
@@ -458,7 +456,7 @@ class DB extends Basis {
   /** 以下法必须配置 primaryKey & foreignKey */
   flatten<T extends DataItem>(list: T[], childrenKey: string): T[] {
     if (!list) {
-      throw "list cannot be undefined"
+      throw "function flatten: list cannot be undefined"
     }
     const data: T[] = [];
     const deep = (array: T[], foreignKey: string | number): void => {
@@ -492,7 +490,7 @@ class DB extends Basis {
    */
   children<T extends DataItem>(where: Where): T[] {
     if (!where) {
-      throw "where cannot be undefined"
+      throw "function children: where cannot be undefined"
     }
     let item: T;
     if (this.primaryKey in where && this.foreignKey in where) {
@@ -558,7 +556,7 @@ class DB extends Basis {
    */
   parent<T extends DataItem>(where: Where): T {
     if (!where) {
-      throw "where cannot be undefined"
+      throw "function parent: where cannot be undefined"
     }
     if (this.foreignKey in where) {
       const parentWhere: Where = {};
@@ -618,7 +616,7 @@ class DB extends Basis {
    */
   siblings<T extends DataItem>(where: Where): T[] {
     if (!where) {
-      throw "where cannot be undefined"
+      throw "function siblings: where cannot be undefined"
     }
     const item = this.selectOne<T>(where);
     if (item) {

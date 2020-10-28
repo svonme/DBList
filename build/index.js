@@ -504,8 +504,6 @@ var Basis = (function () {
                 var item = array_1_1.value;
                 var value = _.pick(item, [this.primaryKey, this.foreignKey, this.indexName]);
                 var map = this.data.get(item[this.foreignKey]);
-                console.log(value);
-                console.log(item);
                 map.set(item[this.primaryKey], value);
             }
         }
@@ -539,7 +537,7 @@ var DB = (function (_super) {
     }
     DB.prototype.selectOne = function (where) {
         if (!where) {
-            throw "where cannot be undefined";
+            throw "function selectOne: where cannot be undefined";
         }
         var _a = __read(this.select(where, 1), 1), data = _a[0];
         return data;
@@ -561,7 +559,7 @@ var DB = (function (_super) {
     DB.prototype.flatten = function (list, childrenKey) {
         var _this = this;
         if (!list) {
-            throw "list cannot be undefined";
+            throw "function flatten: list cannot be undefined";
         }
         var data = [];
         var deep = function (array, foreignKey) {
@@ -589,7 +587,7 @@ var DB = (function (_super) {
     };
     DB.prototype.children = function (where) {
         if (!where) {
-            throw "where cannot be undefined";
+            throw "function children: where cannot be undefined";
         }
         var item;
         if (this.primaryKey in where && this.foreignKey in where) {
@@ -667,7 +665,7 @@ var DB = (function (_super) {
     };
     DB.prototype.parent = function (where) {
         if (!where) {
-            throw "where cannot be undefined";
+            throw "function parent: where cannot be undefined";
         }
         if (this.foreignKey in where) {
             var parentWhere = {};
@@ -728,7 +726,7 @@ var DB = (function (_super) {
     };
     DB.prototype.siblings = function (where) {
         if (!where) {
-            throw "where cannot be undefined";
+            throw "function siblings: where cannot be undefined";
         }
         var item = this.selectOne(where);
         if (item) {
