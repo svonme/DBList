@@ -184,12 +184,11 @@ pid 为自动生成的外键关系数据，详情参考下面的介绍
 ## 构造参数
 
 ```
-new DBList(list, primaryKey, foreignKey)
+new DBList(list, primaryKey, foreignKey, fristForeignValue, indexName)
 ```
 
 |  字段 | 是否可以为空  | 说明  | 默认值  |
 | ------------ | ------------ | ------------ | ------------ |
-|  name | 否 | 对象名称 | - |
 |  list | 否 | 实列化时默认执行一次 insert 方法  | [] |
 |  primaryKey | 否 | 主键 , 用于标识别当前数据 | "id" |
 |  foreignKey | 否 | 外键, 用于与哪条数据进行关联 | "pid" "

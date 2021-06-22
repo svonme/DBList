@@ -75,7 +75,7 @@ var Basis = (function () {
     Basis.prototype.IsMatchLike = function (data, where) {
         var keys = _.keys(where);
         var status = true;
-        for (var i = 0, length = keys.length; i < length; i++) {
+        for (var i = 0, length_1 = keys.length; i < length_1; i++) {
             var key = keys[i];
             if (data.hasOwnProperty(key) && _.includes(data[key], where[key])) {
                 continue;
@@ -90,7 +90,7 @@ var Basis = (function () {
     Basis.prototype.IsMatch = function (data, where) {
         var keys = _.keys(where);
         var status = true;
-        for (var i = 0, length = keys.length; i < length; i++) {
+        for (var i = 0, length_2 = keys.length; i < length_2; i++) {
             var key = keys[i];
             if (_.isArray(where[key])) {
                 if (_.includes(where[key], data[key])) {
@@ -247,8 +247,8 @@ var Basis = (function () {
                     for (var _o = (e_6 = void 0, __values(map.keys())), _p = _o.next(); !_p.done; _p = _o.next()) {
                         var index = _p.value;
                         var item = map.get(index);
-                        var status = item ? match(item) : false;
-                        if (status) {
+                        var status_1 = item ? match(item) : false;
+                        if (status_1) {
                             result.push(item);
                             if (limit > 0 && result.length >= limit) {
                                 flag = false;
@@ -378,8 +378,8 @@ var Basis = (function () {
         var originList = this.select(where);
         try {
             for (var originList_1 = __values(originList), originList_1_1 = originList_1.next(); !originList_1_1.done; originList_1_1 = originList_1.next()) {
-                var origin = originList_1_1.value;
-                var key = origin[this.primaryKey];
+                var origin_1 = originList_1_1.value;
+                var key = origin_1[this.primaryKey];
                 try {
                     for (var _e = (e_10 = void 0, __values(this.data.keys())), _f = _e.next(); !_f.done; _f = _e.next()) {
                         var foreignKey = _f.value;
@@ -392,14 +392,14 @@ var Basis = (function () {
                                         this.data.set(value[this.foreignKey], new Map());
                                     }
                                     var temp = this.data.get(value[this.foreignKey]);
-                                    temp.set(key, Object.assign({}, origin, value));
+                                    temp.set(key, Object.assign({}, origin_1, value));
                                 }
                                 else {
-                                    map.set(key, Object.assign({}, origin, value));
+                                    map.set(key, Object.assign({}, origin_1, value));
                                 }
                             }
                             else {
-                                map.set(key, Object.assign({}, origin, value));
+                                map.set(key, Object.assign({}, origin_1, value));
                             }
                         }
                     }
@@ -416,8 +416,8 @@ var Basis = (function () {
                     foreignKeyHooks[key] = value[this.primaryKey];
                 }
                 if (this.foreignKey in value) {
-                    if (origin[this.foreignKey]) {
-                        foreignKeyHooks[origin[this.foreignKey]] = value[this.foreignKey];
+                    if (origin_1[this.foreignKey]) {
+                        foreignKeyHooks[origin_1[this.foreignKey]] = value[this.foreignKey];
                     }
                 }
             }
@@ -705,9 +705,9 @@ var DB = (function (_super) {
             for (var _b = __values(this.select(where)), _c = _b.next(); !_c.done; _c = _b.next()) {
                 var item = _c.value;
                 var data = Object.assign({}, item);
-                var parent = deep(data);
-                if (parent) {
-                    data[parentKey] = parent;
+                var parent_1 = deep(data);
+                if (parent_1) {
+                    data[parentKey] = parent_1;
                 }
                 result.push(data);
             }
