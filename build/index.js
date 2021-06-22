@@ -632,7 +632,7 @@ var DB = (function (_super) {
                 }
                 finally { if (e_17) throw e_17.error; }
             }
-            return list;
+            return _.sortBy(list, [_this.indexName]);
         };
         var result = [];
         if (!where) {

@@ -524,7 +524,7 @@ class DB extends Basis {
           item[childrenKey] = array
         }
       }
-      return list;
+      return _.sortBy(list, [this.indexName]) as T[];
     };
     const result: T[] = [];
     if (!where) {
