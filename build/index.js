@@ -524,11 +524,12 @@ var Basis = (function () {
 }());
 var DB = (function (_super) {
     __extends(DB, _super);
-    function DB(list, primaryKey, foreignKey, foreignKeyValue) {
+    function DB(list, primaryKey, foreignKey, foreignKeyValue, indexName) {
         if (list === void 0) { list = []; }
         if (primaryKey === void 0) { primaryKey = 'id'; }
         if (foreignKey === void 0) { foreignKey = 'pid'; }
         if (foreignKeyValue === void 0) { foreignKeyValue = '0'; }
+        if (indexName === void 0) { indexName = 'dbIndex'; }
         var _this = this;
         if (_.isString(list)) {
             console.warn('Dblist has removed the name field in version 0.2.4');
@@ -536,8 +537,9 @@ var DB = (function (_super) {
             primaryKey = foreignKey;
             foreignKey = String(foreignKeyValue);
             foreignKeyValue = '0';
+            indexName = void 0;
         }
-        _this = _super.call(this, list, primaryKey, foreignKey, foreignKeyValue) || this;
+        _this = _super.call(this, list, primaryKey, foreignKey, foreignKeyValue, indexName) || this;
         return _this;
     }
     DB.prototype.selectOne = function (where) {
