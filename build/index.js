@@ -563,6 +563,7 @@ var DB = (function (_super) {
     };
     DB.prototype.flatten = function (list, childrenKey) {
         var _this = this;
+        if (childrenKey === void 0) { childrenKey = "children"; }
         if (!list) {
             throw "function flatten: list cannot be undefined";
         }

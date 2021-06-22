@@ -193,7 +193,7 @@ new DBList(list, primaryKey, foreignKey, fristForeignValue, indexName)
 |  primaryKey | 否 | 主键 , 用于标识别当前数据 | "id" |
 |  foreignKey | 否 | 外键, 用于与哪条数据进行关联 | "pid" "
 |  fristForeignValue | 否 | 第一层外键的值 | "0" |
-|  indexName | 否 | 记录每一个数据的顺序 | Number |
+|  indexName | 否 | 记录每一个数据的顺序 | "dbIndex" |
 
 
 ### 测试数据

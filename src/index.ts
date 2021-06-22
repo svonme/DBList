@@ -459,7 +459,7 @@ class DB extends Basis {
     return array;
   }
   /** 以下法必须配置 primaryKey & foreignKey */
-  flatten<T extends DataItem>(list: T[], childrenKey: string): T[] {
+  flatten<T extends DataItem>(list: T[], childrenKey: string = "children"): T[] {
     if (!list) {
       throw "function flatten: list cannot be undefined"
     }

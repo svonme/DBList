@@ -1,6 +1,6 @@
 {
   "name": "@fengqiaogang/dblist",
-  "version": "0.3.9",
+  "version": "0.3.95",
   "description": "Operate on a set of regular list data",
   "main": "build/index.min.js",
   "types": "types/index.d.ts",
@@ -32,7 +32,6 @@
   },
   "files": [
     "build/",
-    "src/",
     "types/",
     "tsconfig.json",
     "README.md",
