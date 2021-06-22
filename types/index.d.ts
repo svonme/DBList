@@ -92,14 +92,14 @@ declare class DB extends Basis {
    * @param where 
    * @param childrenKey  子级数据的键名
    */
-  childrenDeep<T>(where: Where, childrenKey?: string): T[]
+  childrenDeep<T>(where?: Where, childrenKey?: string): T[]
   /**
    * childrenDeep + flatten
    * 把 childrenDeep 的数据做降维处理 
    * @param where 
    * @param childrenKey  子级数据的键名
    */
-  childrenDeepFlatten<T>(where: Where, childrenKey?: string): T[]
+  childrenDeepFlatten<T>(where?: Where, childrenKey?: string): T[]
   /**
    * 查询父级数据，与 children 方法进行相反方向查询
    * @param where 
