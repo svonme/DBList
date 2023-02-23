@@ -28,7 +28,7 @@
     "test/**/*.ts",
     "test/**/*.tsx",
     "types/*.ts",
-    "types/*..dts",
+    "types/*..dts", "test/demo.ts",
   ],
   "exclude": ["node_modules"]
 }

@@ -3,7 +3,7 @@ import { defineConfig } from "vite";
 
 export default defineConfig({
   resolve: {
-    extensions: [".ts"],
+    extensions: [".ts", ".js"],
     alias: {
       "src/": `${path.resolve(__dirname, "src")}/`,
     },

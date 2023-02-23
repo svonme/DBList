@@ -1,11 +1,13 @@
 {
   "name": "@fengqiaogang/dblist",
-  "version": "0.3.98",
+  "version": "1.0.1",
+  "type": "module",
   "description": "Operate on a set of regular list data",
   "main": "build/index.min.js",
   "types": "types/index.d.ts",
   "scripts": {
-    "build": "vite build"
+    "build": "vite build",
+    "test": "vite"
   },
   "repository": {
     "type": "git",
@@ -25,6 +27,17 @@
     "url": "https://github.com/svonme/DBList/issues"
   },
   "homepage": "https://github.com/svonme/DBList#readme",
+  "dependencies": {
+    "lodash-es": "^4.17.21"
+  },
+  "devDependencies": {
+    "@types/lodash-es": "^4.17.6",
+    "@types/node": "^18.14.0",
+    "ts-node": "^10.9.1",
+    "tslib": "^2.5.0",
+    "typescript": "^4.9.5",
+    "vite": "^4.1.4"
+  },
   "files": [
     "build/",
     "types/",
@@ -32,12 +45,5 @@
     "README.md",
     "LICENSE",
     "package.json"
-  ],
-  "devDependencies": {
-    "@types/node": "^18.14.0",
-    "ts-node": "^10.9.1",
-    "tslib": "^2.5.0",
-    "typescript": "^4.9.5",
-    "vite": "^4.1.4"
-  }
+  ]
 }

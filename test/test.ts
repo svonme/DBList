@@ -1,4 +1,4 @@
-[
+export const list = [
   {
     "id": "100",
     "name": ["A", "张三"],
