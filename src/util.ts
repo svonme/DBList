@@ -27,12 +27,28 @@ export const set = function<T = object>(data: T, key: string, value: any): T {
   return Object.assign(data, { [key]: value });
 }
 
+export const forEach = function<T>(list: T[] | IterableIterator<T>, iteratee: (value: T, index: number, list: T[]) => boolean | void) {
+  const array = Array.isArray(list) ? list : [...list];
+  const size = array.length;
+  if (size === 0 || !iteratee) {
+    return;
+  }
+  for (let index = 0; index < size; index++) {
+    const quit = iteratee(array[index], index, array);
+    if (quit) {
+      break;
+    }
+  }
+}
+
 export const omit = function<T = object, Value = T>(data: T, keys: string[]): Value {
   if (keys.length < 1) {
     return data as any;
   }
   const value = {};
-  for (const key of Object.keys(data as object)) {
+  const list = Object.keys(data as object);
+  for (let i = 0, size = list.length; i < size; i++) {
+    const key = list[i];
     if (keys.includes(key)) {
       continue;
     }
@@ -43,20 +59,40 @@ export const omit = function<T = object, Value = T>(data: T, keys: string[]): Va
 
 export const pick = function<T = object, Value = T>(data: T, keys: string[]): Value {
   const value = {};
-  for (const key of keys) {
-    set(value, key, get(data, key));
+  for (let i = 0, size = keys.length; i < size; i++) {
+    set(value, keys[i], get(data, keys[i]));
   }
   return value as Value;
 }
 
-export const concat = function<T>(...args: Array<T[] | T[]>): T[] {
+
+
+export const isIterator = function(value: any): boolean {
+  if (value) {
+    if (typeof value === "string") {
+      return false;
+    }
+    if (typeof value === "number") {
+      return false;
+    }
+    if (typeof value[Symbol.iterator] === 'function') {
+      return true;
+    }
+  }
+  return false;
+}
+
+export const concat = function<T>(...args: Array<T[] | T[] | IterableIterator<T>>): T[] {
   const list: T[] = [];
-  for (const item of args) {
+  for (let i = 0, size = args.length; i < size; i++) {
+    const item = args[i];
     if (Array.isArray(item)) {
       const temp = [].concat(item as any);
       list.push(...concat<T>(...temp));
+    } else if (isIterator(item)){
+      list.push(...item);
     } else {
-      list.push(item);
+      list.push(item as T);
     }
   }
   return list;
@@ -83,7 +119,8 @@ export const flatten = function<T>(
   }
   const data: T[] = [];
   const deep = (array: T[], foreignKey: string | number): void => {
-    for (const item of array) {
+    for (let i = 0, size = array.length; i < size; i++) {
+      const item = array[i];
       // 判断主键是否存在
       if (!hasOwnProperty(item, primary)) {
         set(item, primary, UUid());

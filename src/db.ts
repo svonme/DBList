@@ -4,20 +4,32 @@
 
 import * as _ from "lodash-es";
 import { UUid, hasOwnProperty, get, set, pick, concat, flatten } from "./util";
-import type { Where, Item } from "./type";
+import type { Item } from "./type";
+
+const Add = Symbol("add");
+const Children = Symbol("children");
+const Where = Symbol("Where");
+const WhereAll = Symbol("WhereAll");
+const WherePrimary = Symbol("WherePrimary");
+const WhereForeign = Symbol("WhereForeign");
+const Matcher = Symbol("Matcher");
+const IsMatch = Symbol("IsMatch");
+const IsMatchLike = Symbol("IsMatchLike");
+
+const UnknownKey = Symbol("UnknownKey");
 
 export default class DB<Value = Item> {
-  protected data: Map<string | number, Map<string | number, Value>>;
+  private data: Map<string | number, Map<string | number, Value>>;
   /** 主健 */
-  protected primary: string;
+  readonly primary: string;
   /** 外健 */
-  protected foreign: string;
+  readonly foreign: string;
   /** 第一层外键值 */
-  protected foreignValue: string | number;
+  readonly foreignValue: string | number;
 
-  private unknownKey: string;
+  private [UnknownKey]: string = `unknownKey_${UUid()}`;
   private index: number;
-  protected indexKey: string;
+  private indexKey: string;
 
   constructor(
     list: Value | Array<Value> = [], 
@@ -26,15 +38,14 @@ export default class DB<Value = Item> {
     foreignValue: string | number = 0, 
     indexKey: string = 'index'
   ) {
-    this.index = 1;
+    this.index = 0;
     this.indexKey = indexKey;
     this.primary = primary;
     this.foreign = foreign;
     this.foreignValue = foreignValue;
-    this.unknownKey = `unknownKey_${UUid()}`;
 
     const data = new Map<string | number, Map<string | number, Value>>();
-    data.set(this.unknownKey, new Map());
+    data.set(this[UnknownKey], new Map());
 
     this.data = data;
     this.insert(list);
@@ -59,10 +70,12 @@ export default class DB<Value = Item> {
    * @param data   匹配数据
    * @param where  匹配条件
    */
-  IsMatchLike(data: Value, where: Where): boolean {
+  private [IsMatchLike](data: Value, where: object): boolean {
     // 假设可以匹配成功
     let status = true;
-    for (const key of Object.keys(where)) {
+    const keys = Object.keys(where);
+    for (let i = 0, size = keys.length; i < size; i++) {
+      const key = keys[i];
       // 校验匹配条件是否满足
       const value = get(data, key);
       const text = get(where, key);
@@ -88,9 +101,11 @@ export default class DB<Value = Item> {
    * @param where  要查询的条件
    * @param link   是否模糊查询
    */
-  IsMatch(data: Value, where: Where): boolean {
+  private [IsMatch](data: Value, where: object): boolean {
     let status = true;
-    for (const key of Object.keys(where)) {
+    const keys = Object.keys(where);
+    for (let i = 0, size = keys.length; i < size; i++) {
+      const key = keys[i];
       const value = get(data, key);
       const text = get(where, key);
       // 判断其中一个结果是否为数组
@@ -98,7 +113,7 @@ export default class DB<Value = Item> {
         // 如果列表数据存与查询数据集合中其中一个匹配，则证明单次比对成功
         if (_.includes(text, value)) {
           continue;
-        } else if (Array.isArray(value) && _.size(_.intersection(where[key], value)) > 0) {
+        } else if (Array.isArray(value) && _.size(_.intersection(text, value)) > 0) {
           continue;
         } else {
           // 假如有一次匹配失败，则此次比较任务失败
@@ -125,33 +140,105 @@ export default class DB<Value = Item> {
    * @param where  要查询的条件
    * @param link   是否模糊查询
    */
-  Matcher(where: Where, like: boolean = false): Function {
+  private [Matcher](where: object, like: boolean = false): Function {
     return (value: Value) => {
       if (!value) {
         return false;
       }
       if (like) {
-        return this.IsMatchLike(value, where);
+        return this[IsMatchLike](value, where);
       }
-      return this.IsMatch(value, where);
+      return this[IsMatch](value, where);
     };
   }
   /**
    * 查询所有
    * @param limit 
    */
-  private whereAll(limit: number = 0): Value[] {
+  private [WhereAll](limit: number = 0): Value[] {
+    console.time("all");
     const result: Value[] = [];
-    let status = false;
-    for (const map of this.data.values()) {
-      for (const item of map.values()) {
-        result.push(item);
-        if (limit > 0 && result.length >= limit) {
-          status = true;
+    const maps = concat(this.data.values());
+    for (let i = 0, len = maps.length; i < len; i++) {
+      const map = maps[i];
+      const list = concat(map.values());
+      if (limit > 0) {
+        if (list.length + result.length <= limit) {
+          result.push(...list);
+        } else {
+          const temp = list.slice(0, limit - result.length);
+          result.push(...temp);
+          break;
+        }
+      } else {
+        result.push(...list);
+      }
+    }
+    console.timeEnd("all");
+    return result;
+  }
+  /**
+   * 根据外键查询数据
+   * @param where 查询条件
+   * @param limit 查询数据数量
+   * @returns 
+   */
+  private [WhereForeign](where: object = {}, limit: number = 0): Value[] {
+    let flag = true;
+    const result: Value[] = [];
+    const foreigns: string[] = concat(get(where, this.foreign));
+    for(let i = 0, len = foreigns.length; i < len; i++) {
+      const key = foreigns[i];
+      const map = this.data.get(key);
+      if (!map) {
+        continue;
+      }
+      const list = concat(map.values());
+      if (limit === 0) {
+        result.push(...list);
+      } else {
+        for(let index = 0, size = list.length; index < size; index++) {
+          const item = list[index];
+          result.push(item);
+          // 假如查询数据长度达到限制
+          if (result.length >= limit) {
+            flag = false;
+            break;
+          }
+        }
+      }
+      if (!flag) {
+        break;
+      }
+    }
+    return result;
+  }
+  /**
+   * 根据主键查询数据
+   * @param where 查询条件
+   * @param limit 查询数据数量
+   * @returns
+   */
+  [WherePrimary](where: object = {}, limit: number = 0): Value[] {
+    let flag = true;
+    const result: Value[] = [];
+    const primarys: string[] = concat(get(where, this.primary));
+    for(let i = 0, len = primarys.length; i < len; i++) {
+      const key = primarys[i];
+      const maps = concat(this.data.values());
+      for(let index = 0, size = maps.length; index < size; index++) {
+        const map = maps[index];
+        const value = map.get(key);
+        if (value) {
+          result.push(value);
           break;
         }
       }
-      if (status) {
+      if (limit > 0 && result.length >= limit) {
+        flag = false;
+        break;
+      }
+      if (!flag) {
         break;
       }
     }
@@ -164,70 +251,21 @@ export default class DB<Value = Item> {
    * @param data  查询的数据
    * @param like  是否模糊查询
    */
-  Where(where: Where = {}, limit: number = 0, like: boolean): Value[] {
-    const keys = Object.keys(where);
-    if (keys.length === 0) {
-      return this.whereAll(limit);
-    }
+  private [Where](where: object = {}, limit: number = 0, like: boolean): Value[] {
     let flag = true;
-    let result: Value[] = [];
-    // 主外键查询
-    if (keys.length === 1 && !like) {
-      // 外键查询
-      if (this.foreign in where) {
-        for(const key of [].concat(where[this.foreign])) {
-          const map = this.data.get(key);
-          if (!map) {
-            continue;
-          }
-          if (limit === 0) {
-            result.push(...map.values());
-          } else {
-            for(const item of map.values()) {
-              result.push(item);
-              // 假如查询数据长度达到限制
-              if (result.length >= limit) {
-                flag = false;
-                break;
-              }
-            }
-            if (!flag) {
-              break;
-            }
-          }
-        }
-        return result;
-      }
-      // 主键查询
-      if (this.primary in where) {
-        for(const key of [].concat(where[this.primary])) {
-          for(const map of this.data.values()) {
-            const value = map.get(key);
-            if (value) {
-              result.push(value);
-              break;
-            }
-          }
-          if (limit > 0 && result.length >= limit) {
-            flag = false;
-            break;
-          }
-          if (!flag) {
-            break;
-          }
-        }
-        return result;
-      }
-    }
-
+    const result: Value[] = [];
     // 正常查询
-    const match = this.Matcher(where, like);
-    for(const key of this.data.keys()) {
+    const match = this[Matcher](where, like);
+    const normalKeys = concat(this.data.keys());
+    for(let i = 0, size = normalKeys.length; i < size; i++) {
+      const key = normalKeys[i];
       const map = this.data.get(key);
       if (!map) {
         continue;
       }
-      for(const index of map.keys()) {
+      const keys = concat(map.keys());
+      for(let j = 0, len = keys.length; j < len; j++) {
+        const index = keys[j];
         const item = map.get(index);
         const status = item ? match(item) : false;
         if (item && status) {
@@ -246,39 +284,77 @@ export default class DB<Value = Item> {
     return result;
   }
   /**
+   * 查询任务
+   * @param where 要查询的条件
+   * @param limit 限定查询结果条数
+   * @param data  查询的数据
+   * @param like  是否模糊查询
+   * @param sort  是否启用排序
+   * @returns
+   */
+  where(where: object = {}, limit: number = 0, like: boolean, sort?: boolean) {
+    const keys = Object.keys(where);
+    let list: Value[] = [];
+    if (keys.length === 0) {
+      list = this[WhereAll](limit);
+    } else if (like) {
+      list = this[Where](where, limit, true);
+    } else if (keys.length === 1) {
+      // 主外键查询
+      // 如果只有外键查询条件
+      if (hasOwnProperty(where, this.foreign)) {
+        list = this[WhereForeign](where, limit);
+      }
+      // 如果只有主键查询条件
+      if (hasOwnProperty(where, this.primary)) {
+        list = this[WherePrimary](where, limit);
+      }
+    } else {
+      list = this[Where](where, limit, false);
+    }
+    return sort ? _.sortBy(list, [this.indexKey]) : list;
+  }
+  /**
    * 模糊查询
    * @param where 要查询的条件
    * @param limit 限定查询结果条数
+   * @param sort  是否启用排序
+   * @returns
    */
-  like(where: Where, limit?: number): Value[] {
-    return this.Where(where, limit, true);
+  like(where: object, limit?: number, sort?: boolean): Value[] {
+    return this.where(where, limit, true, sort);
   }
   /**
    * 匹配查询
    * @param where 要查询的条件
    * @param limit 限定查询结果条数
+   * @param sort  是否启用排序
+   * @returns
    */
-  select(where?: Where, limit?: number): Value[] {
-    const array = this.Where(where, limit, false);
-    return _.sortBy(array, [this.indexKey]);
+  select(where?: object, limit?: number, sort?: boolean): Value[] {
+    return this.where(where, limit, false, sort);
   }
-
-
+  [Children] (item: Value): Value[] {
+    const key = get(item, this.primary);
+    const map = this.data.get(key);
+    if (map) {
+      return [...map.values()];
+    }
+    return [];
+  }
   /**
    * 查询元素子级数据
    * @param where 查询条件
    */
-  children(where: Where): Value[] {
+  children(where: object): Value[] {
     if (!where) {
       throw "function children: where cannot be undefined"
     }
     const array: Value[] = [];
-    for (const item of this.select(where)) {
-      const value = get(item, this.primary);
-      const map = this.data.get(value);
-      if (map) {
-        array.push(...map.values());
-      }
+    const list = this.select(where);
+    for (let i = 0, size = list.length; i < size; i++) {
+      const value = this[Children](list[i]);
+      array.push(...value);
     }
     return array;
   }
@@ -287,48 +363,43 @@ export default class DB<Value = Item> {
    * @param where 
    * @param childrenKey 
    */
-  childrenDeep(where?: Where, childrenKey: string = "children"): Value[] {
-    const deep = (query: Where): Value[] => {
-      const list = this.children(query);
-      for(const item of list) {
-        const array = deep(item as Where);
-        if (array && array.length > 0) {
-          set(item, childrenKey, array);
-        }
+  childrenDeep(where?: object, childrenKey: string = "children"): Value[] {
+    const deep = (data: Value): Value => {
+      const array = this[Children](data);
+      if (array && array.length > 0) {
+        set(data, childrenKey, array.map(deep));
       }
-      return _.sortBy(list, [this.indexKey]);
-    };
+      return data;
+    }
     const result: Value[] = [];
-    // if (!where) {
-    //   where = { [this.foreign]: this.foreignValue };
-    // }
-    // for(const item of this.select(where)) {
-    //   const query: Where = { [this.primary]: get(item, this.primary) };
-    //   const array = deep(query);
-    //   if (array && array.length) {
-    //     set(item, childrenKey, array);
-    //   }
-    //   result.push(item);
-    // }
+    if (!where) {
+      where = { [this.foreign]: this.foreignValue };
+    }
+    const list = this.select(where);
+    for(let i = 0, size = list.length; i < size; i++) {
+      result.push(deep(list[i]));
+    }
     return result;
   }
-
-
-  private add(foreign: string, item: Value): string {
+  // 添加数据
+  private [Add](item: Value, foreign?: string | number): string {
     // 判断是否存在主健
     if (!hasOwnProperty(item, this.primary) ) {
       // @ts-ignore
       item[this.primary] = UUid();
     }
+    const id = foreign || foreign === 0 ? foreign : this[UnknownKey];
     const key = get(item, this.primary);
-    if (this.data.has(foreign)) {
-      const map = this.data.get(foreign);
-      map!.set(key, item);
-    } else {
-      const map = new Map<string, Value>();
-      map.set(key, item);
-      this.data.set(foreign, map);
+    if (id && this.data.has(id)) {
+      const map = this.data.get(id);
+      if (map) {
+        map.set(key, item);
+        return key;
+      }
     }
+    const map = new Map<string, Value>();
+    map.set(key, item);
+    this.data.set(id, map);
     return key;
   }
   /**
@@ -356,29 +427,35 @@ export default class DB<Value = Item> {
         // @ts-ignore
         item[this.indexKey] = index;
       }
-      if (hasOwnProperty(item, this.foreign)) {
-        const pid = get(item, this.foreign);
-        keys.push(this.add(pid, item));
-      } else {
-        keys.push(this.add(this.unknownKey, item));
-      }
+      const pid = get(item, this.foreign);
+      keys.push(this[Add](item, pid));
     }
     return keys;
   }
-  // /**
-  //  * 修改数据中的主键
-  //  */
-  // private _updatePrimaryKey(originKey: string | number, newKey: string | number): void {
-  //   const foreignKeys = this.data.keys();
-  //   for(const foreignKey of foreignKeys) {
-  //     const map = this.data.get(foreignKey);
-  //     if(map.has(originKey)) {
-  //       const value = map.get(originKey);
-  //       map.delete(originKey);
-  //       map.set(newKey, value);
-  //     }
-  //   }
-  // }
+  /**
+   * 修改数据中的主键
+   */
+  updatePrimary(oldValue: string | number, newValue: string | number): boolean {
+    return false;
+    // const [ data ] = this.select({[this.primary]: oldValue}, 1);
+    // if (!data) {
+    //   return false;
+    // }
+    // const children = this[Children](data); // 所有子集数据
+    // set(data, this.primary, newValue);
+
+    // this.data.delete(oldValue);
+    // this.insert(data);
+    // const foreignKeys = this.data.keys();
+    // for(const foreignKey of foreignKeys) {
+    //   const map = this.data.get(foreignKey);
+    //   if(map.has(originKey)) {
+    //     const value = map.get(originKey);
+    //     map.delete(originKey);
+    //     map.set(newKey, value);
+    //   }
+    // }
+  }
   // /**
   //  * 修改数据中的外键
   //  */
@@ -470,18 +547,24 @@ export default class DB<Value = Item> {
   remove(where: Where): number {
     const list = this.select(where);
     const data = new Map<string, Value>();
-    for(const item of list) {
+    for(let i = 0, size = list.length; i < size; i++) {
+      const item = list[i];
       const childrenKey: string = "children";
       const value = this.childrenDeep(pick(item, [this.primary]), childrenKey);
       const temp = flatten(value, childrenKey, this.primary, this.foreign, this.foreignValue);
-      for (const item of temp) {
+      for (let j = 0, len = temp.length; j < len; j++) {
+        const item = temp[j];
         const key: string = get(item, this.primary);
         data.set(key, item);
         this.data.delete(key); // 删除子数据
       }
     }
-    for (const map of this.data.values()) {
-      for (const key of data.keys()) {
+    const maps = concat(this.data.values());
+    for (let i = 0, size = maps.length; i < size; i++) {
+      const map = maps[i];
+      const keys = concat(data.keys());
+      for (let index = 0, len = keys.length; index < len; index++) {
+        const key = keys[index];
         map.delete(key); // 删除数据
       }
     }
@@ -489,14 +572,15 @@ export default class DB<Value = Item> {
   }
   /** 清空整个 DB 数据 */
   clear (): void {
-    const data = new Map();
-    data.set(this.unknownKey, new Map());
+    const data = new Map<string | number, Map<string | number, Value>>();
+    data.set(this[UnknownKey], new Map<string | number, Value>());
     this.data = data
   }
   /** 清空某元素数据，只保留 primary & foreign 属性 */
   empty(where: Where): void {
     const array = this.select(where);
-    for(const item of array) {
+    for(let i = 0, size = array.length; i < size; i++) {
+      const item = array[i];
       const value = pick(item, [this.primary, this.foreign, this.indexKey]);
       const map = this.data.get(get(item, this.foreign));
       if (map) {
