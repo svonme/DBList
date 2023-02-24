@@ -2,8 +2,7 @@
  * @file DB
  */
 
-import * as _ from "lodash-es";
-import { UUid, hasOwnProperty, get, set, pick, concat, flatten } from "./util";
+import * as _ from "./util";
 import type { Item } from "./type";
 
 const Add = Symbol("add");
@@ -27,7 +26,7 @@ export default class DB<Value = Item> {
   /** 第一层外键值 */
   readonly foreignValue: string | number;
 
-  private [UnknownKey]: string = `unknownKey_${UUid()}`;
+  private [UnknownKey]: string = `unknownKey_${_.UUid()}`;
   private index: number;
   private indexKey: string;
 
@@ -50,6 +49,7 @@ export default class DB<Value = Item> {
     this.data = data;
     this.insert(list);
   }
+  
   /**
    * 统计数据总量
    * @returns 
@@ -77,13 +77,13 @@ export default class DB<Value = Item> {
     for (let i = 0, size = keys.length; i < size; i++) {
       const key = keys[i];
       // 校验匹配条件是否满足
-      const value = get(data, key);
-      const text = get(where, key);
+      const value = _.get(data, key);
+      const text = _.get(where, key);
       if (
         value && 
         text && 
         typeof text === "string" && 
-        hasOwnProperty(data, key) && 
+        _.hasOwnProperty(data, key) && 
         _.includes(value, text)
       ) {
         continue;
@@ -106,8 +106,8 @@ export default class DB<Value = Item> {
     const keys = Object.keys(where);
     for (let i = 0, size = keys.length; i < size; i++) {
       const key = keys[i];
-      const value = get(data, key);
-      const text = get(where, key);
+      const value = _.get(data, key);
+      const text = _.get(where, key);
       // 判断其中一个结果是否为数组
       if (text && Array.isArray(text)) {
         // 如果列表数据存与查询数据集合中其中一个匹配，则证明单次比对成功
@@ -122,9 +122,9 @@ export default class DB<Value = Item> {
         }
       } else {
         // 假如值的结果不相等，假如key不存在
-        if (text !== value || !hasOwnProperty(data, key)) {
+        if (text !== value || !_.hasOwnProperty(data, key)) {
           // 假设 key 值是数组
-          if (_.includes(concat(value), text)) {
+          if (_.includes(_.concat<string>(value), text)) {
             continue;
           } else {
             status = false;
@@ -158,10 +158,10 @@ export default class DB<Value = Item> {
   private [WhereAll](limit: number = 0): Value[] {
     console.time("all");
     const result: Value[] = [];
-    const maps = concat(this.data.values());
+    const maps = _.concat(this.data.values());
     for (let i = 0, len = maps.length; i < len; i++) {
       const map = maps[i];
-      const list = concat(map.values());
+      const list = _.concat(map.values());
       if (limit > 0) {
         if (list.length + result.length <= limit) {
           result.push(...list);
@@ -186,14 +186,14 @@ export default class DB<Value = Item> {
   private [WhereForeign](where: object = {}, limit: number = 0): Value[] {
     let flag = true;
     const result: Value[] = [];
-    const foreigns: string[] = concat(get(where, this.foreign));
+    const foreigns: string[] = _.concat(_.get(where, this.foreign));
     for(let i = 0, len = foreigns.length; i < len; i++) {
       const key = foreigns[i];
       const map = this.data.get(key);
       if (!map) {
         continue;
       }
-      const list = concat(map.values());
+      const list = _.concat(map.values());
       if (limit === 0) {
         result.push(...list);
       } else {
@@ -222,10 +222,10 @@ export default class DB<Value = Item> {
   [WherePrimary](where: object = {}, limit: number = 0): Value[] {
     let flag = true;
     const result: Value[] = [];
-    const primarys: string[] = concat(get(where, this.primary));
+    const primarys: string[] = _.concat(_.get(where, this.primary));
     for(let i = 0, len = primarys.length; i < len; i++) {
       const key = primarys[i];
-      const maps = concat(this.data.values());
+      const maps = _.concat(this.data.values());
       for(let index = 0, size = maps.length; index < size; index++) {
         const map = maps[index];
         const value = map.get(key);
@@ -256,14 +256,14 @@ export default class DB<Value = Item> {
     const result: Value[] = [];
     // 正常查询
     const match = this[Matcher](where, like);
-    const normalKeys = concat(this.data.keys());
+    const normalKeys = _.concat(this.data.keys());
     for(let i = 0, size = normalKeys.length; i < size; i++) {
       const key = normalKeys[i];
       const map = this.data.get(key);
       if (!map) {
         continue;
       }
-      const keys = concat(map.keys());
+      const keys = _.concat(map.keys());
       for(let j = 0, len = keys.length; j < len; j++) {
         const index = keys[j];
         const item = map.get(index);
@@ -302,11 +302,11 @@ export default class DB<Value = Item> {
     } else if (keys.length === 1) {
       // 主外键查询
       // 如果只有外键查询条件
-      if (hasOwnProperty(where, this.foreign)) {
+      if (_.hasOwnProperty(where, this.foreign)) {
         list = this[WhereForeign](where, limit);
       }
       // 如果只有主键查询条件
-      if (hasOwnProperty(where, this.primary)) {
+      if (_.hasOwnProperty(where, this.primary)) {
         list = this[WherePrimary](where, limit);
       }
     } else {
@@ -335,7 +335,7 @@ export default class DB<Value = Item> {
     return this.where(where, limit, false, sort);
   }
   [Children] (item: Value): Value[] {
-    const key = get(item, this.primary);
+    const key = _.get(item, this.primary);
     const map = this.data.get(key);
     if (map) {
       return [...map.values()];
@@ -367,7 +367,7 @@ export default class DB<Value = Item> {
     const deep = (data: Value): Value => {
       const array = this[Children](data);
       if (array && array.length > 0) {
-        set(data, childrenKey, array.map(deep));
+        _.set(data, childrenKey, array.map(deep));
       }
       return data;
     }
@@ -383,23 +383,23 @@ export default class DB<Value = Item> {
   }
   // 添加数据
   private [Add](item: Value, foreign?: string | number): string {
+    if (!foreign && foreign !== 0) {
+      foreign = this[UnknownKey];
+    }
     // 判断是否存在主健
-    if (!hasOwnProperty(item, this.primary) ) {
+    if (!_.hasOwnProperty(item, this.primary) ) {
       // @ts-ignore
       item[this.primary] = UUid();
     }
-    const id = foreign || foreign === 0 ? foreign : this[UnknownKey];
-    const key = get(item, this.primary);
-    if (id && this.data.has(id)) {
-      const map = this.data.get(id);
-      if (map) {
-        map.set(key, item);
-        return key;
-      }
+    const key = _.get(item, this.primary);
+    if (this.data.has(foreign)) {
+      const map = this.data.get(foreign);
+      map!.set(key, item);
+    } else {
+      const map = new Map<string, Value>();
+      map.set(key, item);
+      this.data.set(foreign, map);
     }
-    const map = new Map<string, Value>();
-    map.set(key, item);
-    this.data.set(id, map);
     return key;
   }
   /**
@@ -407,13 +407,13 @@ export default class DB<Value = Item> {
    * @param row
    * @description 返回数据的主键集合
    */
-  insert(row: Value | Value[]): Array<string | number> {
+  insert(row?: Value | Value[]): Array<string | number> {
     const keys: Array<string | number> = [];
     if (!row) {
       return keys;
     }
-    const list = flatten<Value>(
-      concat<Value>(row as Value[]), 
+    const list = _.flatten<Value>(
+      _.concat<Value>(row as Value[]), 
       "children", 
       this.primary, 
       this.foreign, 
@@ -423,11 +423,11 @@ export default class DB<Value = Item> {
       const item = { ...list[i] };
       const index = this.getIndex();
       // 判断是否有排序字段
-      if (!hasOwnProperty(item, this.indexKey)) {
+      if (!_.hasOwnProperty(item, this.indexKey)) {
         // @ts-ignore
         item[this.indexKey] = index;
       }
-      const pid = get(item, this.foreign);
+      const pid = _.get(item, this.foreign);
       keys.push(this[Add](item, pid));
     }
     return keys;
@@ -544,25 +544,25 @@ export default class DB<Value = Item> {
    * @param where 需要删除的数据的查询条件
    * @description 返回受影响的行数
    */
-  remove(where: Where): number {
+  remove(where: object): number {
     const list = this.select(where);
     const data = new Map<string, Value>();
     for(let i = 0, size = list.length; i < size; i++) {
       const item = list[i];
       const childrenKey: string = "children";
-      const value = this.childrenDeep(pick(item, [this.primary]), childrenKey);
-      const temp = flatten(value, childrenKey, this.primary, this.foreign, this.foreignValue);
+      const value = this.childrenDeep(_.pick(item, [this.primary]), childrenKey);
+      const temp = _.flatten(value, childrenKey, this.primary, this.foreign, this.foreignValue);
       for (let j = 0, len = temp.length; j < len; j++) {
         const item = temp[j];
-        const key: string = get(item, this.primary);
+        const key: string = _.get(item, this.primary);
         data.set(key, item);
         this.data.delete(key); // 删除子数据
       }
     }
-    const maps = concat(this.data.values());
+    const maps = _.concat(this.data.values());
     for (let i = 0, size = maps.length; i < size; i++) {
       const map = maps[i];
-      const keys = concat(data.keys());
+      const keys = _.concat(data.keys());
       for (let index = 0, len = keys.length; index < len; index++) {
         const key = keys[index];
         map.delete(key); // 删除数据
@@ -577,14 +577,14 @@ export default class DB<Value = Item> {
     this.data = data
   }
   /** 清空某元素数据，只保留 primary & foreign 属性 */
-  empty(where: Where): void {
+  empty(where: object): void {
     const array = this.select(where);
     for(let i = 0, size = array.length; i < size; i++) {
       const item = array[i];
-      const value = pick(item, [this.primary, this.foreign, this.indexKey]);
-      const map = this.data.get(get(item, this.foreign));
+      const value = _.pick(item, [this.primary, this.foreign, this.indexKey]);
+      const map = this.data.get(_.get(item, this.foreign));
       if (map) {
-        map.set(get(item, this.primary), value as Value);
+        map.set(_.get(item, this.primary), value as Value);
       }
     }
   }

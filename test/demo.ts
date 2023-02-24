@@ -1,8 +1,8 @@
 
 // const DB = require('../build/index.js');
 
-import { list as Data } from './test';
-// import Data from "./data.json";
+// import { list as Data } from './test';
+import Data from "./data.json";
 
 
 // const db = new DB(list);
@@ -21,11 +21,13 @@ import { list as Data } from './test';
 // console.log(db.clone());
 
 import DB from "../src/index";
+// import DB from "../build/db";
 
 const db = new DB(Data);
-console.time("data");
-db.childrenDeep();
-console.timeEnd("data");
+console.time("db")
+console.log(db.size());
+console.log(db.childrenDeep());
+console.timeEnd("db");
 console.log(db);
 
 

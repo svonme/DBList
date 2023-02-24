@@ -14,22 +14,23 @@ export const list = [
             "name": "C",
             "pid": "101",
             "children": [
-              {
-                "id": "103",
-                "name": "D",
-                "pid": "102",
-                "children": [
-                  {
-                    "id": "104",
-                    "name": "E",
-                    "pid": "103",
-                    "children": []
-                  }
-                ]
-              }
+              
             ]
           }
         ]
+      }
+    ]
+  },
+  {
+    "id": "103",
+    "name": "D",
+    "pid": 0,
+    "children": [
+      {
+        "id": "104",
+        "name": "E",
+        "pid": "103",
+        "children": []
       }
     ]
   }

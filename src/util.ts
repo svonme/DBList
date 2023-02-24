@@ -1,6 +1,8 @@
 
 import * as _ from "lodash-es";
 
+export { sortBy, intersection } from "lodash-es";
+
 let _UUIDIndex = 1;
 
 export const UUid = function() {
@@ -27,6 +29,16 @@ export const set = function<T = object>(data: T, key: string, value: any): T {
   return Object.assign(data, { [key]: value });
 }
 
+export const size = function(value: string | Array<any> | object): number {
+  if (typeof value === "string" || Array.isArray(value)) {
+    return value.length;
+  }
+  if (typeof value === "object") {
+    return size(Object.keys(value));
+  }
+  return 0;
+}
+
 export const forEach = function<T>(list: T[] | IterableIterator<T>, iteratee: (value: T, index: number, list: T[]) => boolean | void) {
   const array = Array.isArray(list) ? list : [...list];
   const size = array.length;
@@ -39,6 +51,17 @@ export const forEach = function<T>(list: T[] | IterableIterator<T>, iteratee: (v
       break;
     }
   }
+}
+
+export const includes = function(value: string | string[] | number[], target: string | number) {
+  if (target && value && Array.isArray(value)) {
+    // @ts-ignore
+    return value.includes(target);
+  }
+  if (target && value) {
+    return String(value).includes(target as string);
+  }
+  return false;
 }
 
 export const omit = function<T = object, Value = T>(data: T, keys: string[]): Value {
@@ -108,7 +131,7 @@ export const concat = function<T>(...args: Array<T[] | T[] | IterableIterator<T>
  * @returns 
  */
 export const flatten = function<T>(
-  list: T[], 
+  list: T | T[], 
   childrenKey: string = "children", 
   primary: string = "id", 
   foreign: string = "pid", 
@@ -118,28 +141,25 @@ export const flatten = function<T>(
     throw "function flatten: list cannot be undefined"
   }
   const data: T[] = [];
-  const deep = (array: T[], foreignKey: string | number): void => {
-    for (let i = 0, size = array.length; i < size; i++) {
-      const item = array[i];
-      // 判断主键是否存在
-      if (!hasOwnProperty(item, primary)) {
-        set(item, primary, UUid());
-      }
-      // 判断外键是否存在
-      if (!hasOwnProperty(item, foreign)) {
-        set(item, foreign, foreignKey);
-      }
-      const id = get(item, primary);
-      const value = omit(item as object, [childrenKey]);
-      data.push(value as T);
-      if (get(item, childrenKey)) {
-        const children = concat<T>(get(item, childrenKey));
-        if (children.length > 0) {
-          deep(children, id);
-        }
+  const array = concat<T>(list as any);
+  for (let i = 0, size = array.length; i < size; i++) {
+    const item = array[i];
+    // 判断主键是否存在
+    if (!hasOwnProperty(item, primary)) {
+      set(item, primary, UUid());
+    }
+    // 判断外键是否存在
+    if (!hasOwnProperty(item, foreign)) {
+      set(item, foreign, foreignValue);
+    }
+    const key = get(item, primary);
+    data.push(omit(item, [childrenKey]));
+    if (hasOwnProperty(item, childrenKey)) {
+      const children = flatten(get(item, childrenKey), childrenKey, primary, foreign, key);
+      if (children && children.length > 0) {
+        data.push(...children);
       }
     }
-  };
-  deep(list, foreignValue);
+  }
   return data;
 }
