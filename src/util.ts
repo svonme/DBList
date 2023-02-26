@@ -11,6 +11,10 @@ export const UUid = function() {
   return `${id}_${key}`;
 }
 
+export const keys = function<T = object>(value: T): string[] {
+  return Object.keys(value as object);
+}
+
 export const hasOwnProperty = function(value: any, key: string) {
   if (value && key && value.hasOwnProperty) {
     return value.hasOwnProperty(key);
@@ -34,7 +38,7 @@ export const size = function(value: string | Array<any> | object): number {
     return value.length;
   }
   if (typeof value === "object") {
-    return size(Object.keys(value));
+    return size(keys(value));
   }
   return 0;
 }
@@ -64,15 +68,15 @@ export const includes = function(value: string | string[] | number[], target: st
   return false;
 }
 
-export const omit = function<T = object, Value = T>(data: T, keys: string[]): Value {
-  if (keys.length < 1) {
+export const omit = function<T = object, Value = T>(data: T, keyList: string[]): Value {
+  if (keyList.length < 1) {
     return data as any;
   }
   const value = {};
-  const list = Object.keys(data as object);
+  const list = keys(data as object);
   for (let i = 0, size = list.length; i < size; i++) {
     const key = list[i];
-    if (keys.includes(key)) {
+    if (keyList.includes(key)) {
       continue;
     }
     set(value, key, get(data, key));
@@ -80,10 +84,10 @@ export const omit = function<T = object, Value = T>(data: T, keys: string[]): Va
   return value as Value;
 }
 
-export const pick = function<T = object, Value = T>(data: T, keys: string[]): Value {
+export const pick = function<T = object, Value = T>(data: T, keyList: string[]): Value {
   const value = {};
-  for (let i = 0, size = keys.length; i < size; i++) {
-    set(value, keys[i], get(data, keys[i]));
+  for (let i = 0, size = keyList.length; i < size; i++) {
+    set(value, keyList[i], get(data, keyList[i]));
   }
   return value as Value;
 }
