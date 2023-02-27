@@ -1,8 +1,8 @@
 
 // const DB = require('../build/index.js');
 
-// import { list as Data } from './test';
-import Data from "./data.json";
+import { list as Data } from './test';
+// import Data from "./data.json";
 
 
 // const db = new DB(list);
@@ -31,20 +31,39 @@ import Data from "./data.json";
 // console.log(db);
 
 import Storage from "../src/storage";
+// import Storage from "../build/storage";
+// const Storage = require("../build/storage.umd.cjs");
 
 
-console.time("db");
-const db = new Storage();
-db.insert(Data);
-console.timeEnd("db");
+// console.time("db");
+const db = new Storage(Data as any[]);
+// console.timeEnd("db");
+// console.log("size = ", db.size());
 
-console.time("select");
-const values = db.select({
-  pid: 0
-});
-console.timeEnd("select");
-console.log(values)
+// console.time("select");
+// const values = db.select({
+//   pid: 0
+// });
+// console.timeEnd("select");
+// console.log(values)
 
-console.log(db);
+// console.time("remove")
+// // db.remove({ pid: 0 });
+// console.log("size = ", db.size());
+// console.timeEnd("remove")
+
+// db.update({
+//   id: "100"
+// }, {
+//   name: "张三"
+// });
+
+// console.log(db.select({ id: "100" }));
+
+console.time("select all");
+db.childrenDeep({ pid: 0 }).then(function(value) {
+  console.log(value);
+  console.timeEnd("select all");
+})
 
 

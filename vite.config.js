@@ -14,18 +14,19 @@ export default defineConfig({
     target: "modules",
     polyfillModulePreload: false,
     lib: {
-      entry: "src/storage/index",
-      name: "db",
-      formats: ["es"],
-      fileName: "db"
+      entry: "src/index",
+      name: "storage",
+      formats: ["es", "umd"],
+      fileName: "storage",
+      
     },
     sourcemap: true,
     manifest: false,
     rollupOptions: {
       external: [
-        /^lodash/i,
       ],
       output: {
+        exports: "default",
         inlineDynamicImports: true
       }
     }

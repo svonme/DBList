@@ -10,6 +10,27 @@ export default class DB<Value = object> {
   constructor(readonly primary: string = "id") {
     this.db = new Map<string | number, Map<string | number, any>>();
   }
+  size(): number {
+    const table = this.db.get(this.primary);
+    return table?.size || 0;
+  }
+  clear() {
+    this.db = new Map<string | number, Map<string | number, any>>();
+  }
+  /**
+   * 查询所有数据
+   * @returns 
+   */
+  toData() {
+    const table = this.db.get(this.primary);
+    const keys = table?.keys() || [];
+    const list: Map<string | number, any>[] = [];
+    for (const id of keys) {
+      const value = this[GetTable](id);
+      list.push(value);
+    }
+    return list;
+  }
   /**
    * 返回对象是否具有给定的 key：value 集合
    * @param data   要匹配的对象
@@ -17,7 +38,7 @@ export default class DB<Value = object> {
    * @param link   是否模糊查询
    */
   private [IsMatch](data: Map<string | number, any>, key: string | number, value: any): boolean {
-    return _.compare(data.get(key), value);
+    return _.compareArray(data.get(key), value);
   }
 
   /**
@@ -48,7 +69,7 @@ export default class DB<Value = object> {
       const key = keys[index];
       const table = this.db.get(key);
       const value = table?.get(primary);
-      _.set(data, key, value);
+      data.set(key, value);
     }
     return data;
   }
@@ -58,7 +79,7 @@ export default class DB<Value = object> {
    * @param value 
    * @returns 
    */
-  private [GetPrimary](key: string | number, value: string | number) {
+  private [GetPrimary](key: string | number, value: any) {
     const primaryList: string[] = [];
     const table = this.db.get(key);
     if (table) {
@@ -66,7 +87,7 @@ export default class DB<Value = object> {
       for (let index = 0, size = keys.length;  index < size; index++) {
         const key = keys[index];
         const item = table.get(key);
-        if (item === value) {
+        if (_.compareArray(item, value)) {
           primaryList.push(String(key));
         }
       }
@@ -96,6 +117,11 @@ export default class DB<Value = object> {
     }
     return primary;
   }
+  /**
+   * 添加数据
+   * @param row 数据列表 
+   * @returns 
+   */
   insert(row: Value[]): Array<string | number> {
     const list: Array<string | number> = [];
     for (let index = 0, len = row.length; index < len; index++) {
@@ -104,6 +130,27 @@ export default class DB<Value = object> {
     }
     return list;
   }
+  /**
+   * 根据主键删除相关数据
+   * @param primary 
+   * @returns 
+   */
+  protected Remove(primary: string | number): boolean {
+    let status = false;
+    for (const table of this.db.values()) {
+      if (table.has(primary)) {
+        status = true;
+        table.delete(primary);
+      }
+    }
+    return status;
+  }
+  /**
+   * 根据 key value 查询相关的所有数据
+   * @param key 
+   * @param value 
+   * @returns 
+   */
   protected get(key: string | number, value: string | number): Map<string | number, any>[] {
     const list: Map<string | number, any>[] = [];
     const primaryList = this[GetPrimary](key, value);
@@ -112,5 +159,21 @@ export default class DB<Value = object> {
       list.push(value);
     }
     return list;
+  }
+
+  protected ChildrenDeepdeep(foreignName: string) {
+    const table = this.db.get(foreignName);
+    const map = new Map<string | number, Set<string | number>>();
+    if (table) {
+      for (const id of table.keys()) {
+        const pid = table.get(id);
+        if (map.has(pid)) {
+          map.get(pid)!.add(id);
+        } else {
+          map.set(pid, new Set<string | number>([id]));
+        }
+      }
+    }
+    return map;
   }
 };

@@ -46,7 +46,7 @@ export const size = function(value: string | Array<any> | object): number {
 }
 
 export const forEach = function<T>(list: T[] | IterableIterator<T>, iteratee: (value: T, index: number, list: T[]) => boolean | void) {
-  const array = Array.isArray(list) ? list : [...list];
+  const array = Array.isArray(list) ? list : concat(list);
   const size = array.length;
   if (size === 0 || !iteratee) {
     return;
@@ -133,6 +133,15 @@ export const compare = function(origin: any, value: any): boolean {
     }
   }
   return status;
+}
+export const compareArray = function(origin: any, value: any): boolean {
+  if (value instanceof Set) {
+    return value.has(origin);
+  }
+  if (Array.isArray(value)) {
+    return compareArray(origin, new Set(value));
+  }
+  return compare(origin, value);
 }
 
 export const concat = function<T>(...args: Array<T | T[] | IterableIterator<T>>): T[] {

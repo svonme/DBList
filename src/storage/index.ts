@@ -6,13 +6,28 @@ import * as _ from "../util";
 const Compare = Symbol("Compare");
 
 export default class Storage<Value = object> extends DB<Value> {
+  /**
+   * @param list 默认数据
+   * @param primary 主键
+   * @param foreign 外健
+   * @param foreignValue 第一层外键值
+   */
   constructor(
+    list: Value[] = [],
     readonly primary: string = "id",
     readonly foreign: string = "pid",
     readonly foreignValue: string | number = 0
   ) {
     super(primary);
+    if (list.length > 0) {
+      this.insert(list);
+    }
   }
+  /**
+   * 添加数据
+   * @param row 需要添加的数据
+   * @returns 返回添加数据的主键（唯一值）
+   */
   insert(row?: any): Array<string | number> {
     if (!row) {
       return [];
@@ -33,20 +48,66 @@ export default class Storage<Value = object> extends DB<Value> {
     );
     return super.insert(list);
   }
+  /**
+   * 删除数据
+   * @param where 查询条件
+   * @returns 返回受影响的行数
+   */
+  remove(where: object): number {
+    let index = 0;
+    const list = this.where(where);
+    for (const item of list) {
+      const id = item.get(this.primary);
+      const status = super.Remove(id);
+      if (status) {
+        index += 1;
+      }
+    }
+    return index;
+  }
+  update(where: object, newValue: Value, limit: number = 0) {
+    let index = 0;
+    const list = this.select(where, limit);
+    const newList: Value[] = [];
+    for (const item of list) {
+      const id = _.get(item, this.primary);
+      const status = super.Remove(id);
+      if (status) {
+        index += 1;
+        newList.push(Object.assign({}, item, newValue));
+      }
+    }
+    this.insert(newList);
+    return index;
+  }
   private [Compare] (list: Map<string | number, any>[], key: string | number, value: any) {
     const array: Map<string | number, any>[] = [];
     for (let i = 0, len = list.length; i < len; i++) {
       const data = list[i];
       // 从查询到集合中匹配符合条件的数据
       const matcher = this.Matcher(data);
-      const status = matcher(key, value);
+      let status = matcher(key, value);
+      if (!status && Array.isArray(value)) {
+        for (const item of value) {
+          status = matcher(key, item);
+          if (status) {
+            break;
+          }
+        }
+      }
       if (status) {
         array.push(data);
       }
     }
     return array;
   }
-  select(where: object, limit: number = 0) {
+  /**
+   * 查询数据
+   * @param where 查询条件
+   * @param limit 查询条数
+   * @returns 返回原始数据
+   */
+  where(where: object, limit: number = 0): Map<string | number, any>[] {
     let list: Map<string | number, any>[] = [];
     let keys: string[] = [];
     for (const key of _.keys(where)) {
@@ -67,10 +128,127 @@ export default class Storage<Value = object> extends DB<Value> {
       } else {
         break;
       }
-      if (limit > 0 && list.length === limit) {
-        break;
+    }
+    return limit > 0 ? list.slice(0, limit) : list;
+  }
+  /**
+   * 查询数据
+   * @param where 查询条件
+   * @param limit 查询条数
+   * @returns 返回泛型格式数据
+   */
+  select(where?: object, limit: number = 0): Value[] {
+    if (where) {
+      const list = this.where(where, limit);
+      return list.map(Object.fromEntries) as Value[];
+    } else {
+      return this.clone(void 0, limit);
+    }
+  }
+  clone<T = Value>(iteratee?: (value: Map<string | number, any>) => T, limit: number = 0): T[] {
+    const list: Map<string | number, any>[] = this.toData();
+    const result: T[] = [];
+    for (let i = 0, len = limit > 0 ? limit : list.length; i < len; i++) {
+      const data = list[i];
+      if (iteratee) {
+        result.push(iteratee(data));
+      } else {
+        result.push(Object.fromEntries(data) as T);
       }
     }
-    return list.map(Object.fromEntries);
+    return result;
+  }
+  /**
+   * 根据查询条件查询第一条数据
+   * @param where 查询条件
+   */
+  selectOne(where: object): Value | undefined {
+    if (where) {
+      const [ value ] = this.select(where, 1);
+      return value;
+    }
+  }
+  /**
+   * 根据条件查询第一条数据的所有兄弟数据
+   * @param where 
+   */
+  siblings(where: object): Value[] {
+    const [ table ] = this.where(where, 1);
+    if (table) {
+      const id = table.get(this.foreign);
+      const query = {[this.foreign]: id};
+      const list: Value[] = [];
+      for (const data of this.where(query)) {
+        const status = _.compare(data.get(this.primary), table.get(this.primary));
+        if (!status) {
+          list.push(Object.fromEntries(data) as Value);
+        }
+      }
+      return list;
+    }
+    return [];
+  }
+  /**
+   * 清空数据中除主键和外键的其余字段
+   * @param where 
+   * @returns 
+   */
+  empty(where: object): number {
+    const list = [];
+    for (const data of this.where(where)) {
+      list.push({
+        [this.primary]: data.get(this.primary),
+        [this.foreign]: data.get(this.foreign)
+      });
+      super.Remove(data.get(this.primary));
+    }
+    const keys = this.insert(list);
+    return keys.length;
+  }
+  /**
+   * 根据条件查询第一条数据的所有子集数据
+   * @param where 
+   * @returns 
+   */
+  children(where: object): Value[] {
+    const [data] = this.where(where, 1);
+    if (data) {
+      const query = {[this.foreign]: data.get(this.primary)};
+      return this.select(query);
+    }
+    return [];
+  }
+  /**
+   * 根据条件查询第一条数据的父级数据
+   * @param where 
+   * @returns 
+   */
+  parent(where: object): Value | undefined {
+    const [data] = this.where(where, 1);
+    if (data) {
+      const query = {[this.primary]: data.get(this.foreign)};
+      return this.selectOne(query);
+    }
+  }
+
+  async childrenDeep(where?: object, childrenName: string = "children"): Promise<Value[]> {
+    const deep = async (data: Value): Promise<Value> => {
+      const query = {[this.foreign]: _.get(data, this.primary)};
+      const children = this.select(query);
+      if (children.length > 0) {
+        _.set(data, childrenName, children);
+        // const 
+        // for (const item of deep(children)) {
+        //   for (const data of list) {
+        //     if(_.compare(_.get(data, this.primary), _.get(item, this.foreign))) {
+        //       _.set(data, childrenName, item);
+        //       break;
+        //     }
+        //   }
+        // }
+      }
+      return data;
+    }
+    return Promise.all(this.select(where).map(deep));
   }
 };

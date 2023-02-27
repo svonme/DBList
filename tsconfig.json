@@ -1,18 +1,18 @@
 {
   "compilerOptions": {
-    "outDir": "build",
-    "target": "ESNext",
+    "outDir": "./build",
+    "rootDir": "./src",
+    "target": "ES6",
     "declaration": true,
     "composite": true,
     "useDefineForClassFields": true,
-    "module": "ESNext",
+    "module": "ES6",
     "moduleResolution": "Node",
     "strict": true,
-    "jsx": "preserve",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "esModuleInterop": true,
-    "lib": ["ESNext", "DOM"],
+    "lib": ["ES2015", "DOM"],
     "skipLibCheck": true,
     "noEmit": true,
     "experimentalDecorators": true,
@@ -24,11 +24,7 @@
   },
   "include": [
     "src/**/*.ts", 
-    "src/**/*.tsx",
-    "test/**/*.ts",
-    "test/**/*.tsx",
-    "types/*.ts",
-    "types/*..dts", "test/demo.ts",
+    "src/**/*.tsx"
   ],
   "exclude": ["node_modules"]
 }
