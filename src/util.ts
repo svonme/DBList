@@ -1,12 +1,8 @@
 
-import * as _ from "lodash-es";
-
-export { sortBy, intersection } from "lodash-es";
-
 let _UUIDIndex = 1;
 
 export const UUid = function() {
-  const id = `DBList_${ _UUIDIndex++ }`;
+  const id = `uuid_${ _UUIDIndex++ }`;
   const key = String(Math.random()).slice(2);
   return `${id}_${key}`;
 }
@@ -28,10 +24,16 @@ export const get = function(value: any, key: string) {
   }
 }
 
-export const set = function<T = object>(data: T, key: string, value: any): T {
-  // @ts-ignore
-  return Object.assign(data, { [key]: value });
+export const set = function<T = object>(data: T, key: string | number, value: any): T {
+  if (data instanceof Map) {
+    data.set(key, value);
+  } else {
+    // @ts-ignore
+    Object.assign(data, { [key]: value });
+  }
+  return data;
 }
+
 
 export const size = function(value: string | Array<any> | object): number {
   if (typeof value === "string" || Array.isArray(value)) {
@@ -109,7 +111,31 @@ export const isIterator = function(value: any): boolean {
   return false;
 }
 
-export const concat = function<T>(...args: Array<T[] | T[] | IterableIterator<T>>): T[] {
+export const compare = function(origin: any, value: any): boolean {
+  const type = typeof origin;
+  let status = false;
+  // 判断两个元素类型是否相同
+  if (type === typeof value) {
+    if (type === "string" || type === "number") {
+      // 字符串或者数字类型时直接使用值判断
+      status = origin === value;
+    } else if (Array.isArray(origin) && origin.length === value.length) {
+      // 如果是数组，则判断每一个元素的值是否相同
+      for (let i = 0, len = origin.length; i < len; i++) {
+        status = compare(origin[i], value[i]);
+        if (status) {
+          // 继续判断下一个元素
+          continue;
+        } else {
+          break;
+        }
+      }
+    }
+  }
+  return status;
+}
+
+export const concat = function<T>(...args: Array<T | T[] | IterableIterator<T>>): T[] {
   const list: T[] = [];
   for (let i = 0, size = args.length; i < size; i++) {
     const item = args[i];
@@ -117,9 +143,11 @@ export const concat = function<T>(...args: Array<T[] | T[] | IterableIterator<T>
       const temp = [].concat(item as any);
       list.push(...concat<T>(...temp));
     } else if (isIterator(item)){
+      // @ts-ignore
       list.push(...item);
     } else {
-      list.push(item as T);
+      // @ts-ignore
+      list.push(item);
     }
   }
   return list;
@@ -139,7 +167,8 @@ export const flatten = function<T>(
   childrenKey: string = "children", 
   primary: string = "id", 
   foreign: string = "pid", 
-  foreignValue: string | number = 0
+  foreignValue: string | number = 0,
+  iteratee?: (value: T) => T
 ){
   if (!list) {
     throw "function flatten: list cannot be undefined"
@@ -157,9 +186,21 @@ export const flatten = function<T>(
       set(item, foreign, foreignValue);
     }
     const key = get(item, primary);
-    data.push(omit(item, [childrenKey]));
+    const value = omit(item, [childrenKey]);
+    if (iteratee && typeof iteratee === "function") {
+      data.push(iteratee(value));
+    } else {
+      data.push(value);
+    }
     if (hasOwnProperty(item, childrenKey)) {
-      const children = flatten(get(item, childrenKey), childrenKey, primary, foreign, key);
+      const children = flatten(
+        get(item, childrenKey), 
+        childrenKey, 
+        primary, 
+        foreign, 
+        key, 
+        iteratee
+      );
       if (children && children.length > 0) {
         data.push(...children);
       }

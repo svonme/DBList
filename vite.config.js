@@ -14,7 +14,7 @@ export default defineConfig({
     target: "modules",
     polyfillModulePreload: false,
     lib: {
-      entry: "src/index",
+      entry: "src/storage/index",
       name: "db",
       formats: ["es"],
       fileName: "db"
