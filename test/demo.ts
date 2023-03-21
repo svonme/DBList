@@ -1,8 +1,8 @@
 
 // const DB = require('../build/index.js');
 
-import { list as Data } from './test';
-// import Data from "./data.json";
+// import { list as Data } from './test';
+import Data from "./data.json";
 
 
 // const db = new DB(list);
@@ -38,7 +38,7 @@ import Storage from "../src/storage";
 // console.time("db");
 const db = new Storage(Data as any[]);
 // console.timeEnd("db");
-// console.log("size = ", db.size());
+console.log("size = ", db.size());
 
 // console.time("select");
 // const values = db.select({
@@ -60,10 +60,10 @@ const db = new Storage(Data as any[]);
 
 // console.log(db.select({ id: "100" }));
 
-console.time("select all");
-db.childrenDeep({ pid: 0 }).then(function(value) {
+console.time("childrenDeep");
+Promise.resolve(db.parentDeepFlatten()).then(function(value) {
   console.log(value);
-  console.timeEnd("select all");
+  console.timeEnd("childrenDeep");
 })
 
 
