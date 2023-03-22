@@ -1,4 +1,4 @@
-[
+export const list = [
   {
     "id": "100",
     "name": ["A", "张三"],
@@ -14,22 +14,23 @@
             "name": "C",
             "pid": "101",
             "children": [
-              {
-                "id": "103",
-                "name": "D",
-                "pid": "102",
-                "children": [
-                  {
-                    "id": "104",
-                    "name": "E",
-                    "pid": "103",
-                    "children": []
-                  }
-                ]
-              }
+              
             ]
           }
         ]
+      }
+    ]
+  },
+  {
+    "id": "103",
+    "name": "D456",
+    "pid": 0,
+    "children": [
+      {
+        "id": "104",
+        "name": "E",
+        "pid": "103",
+        "children": []
       }
     ]
   }

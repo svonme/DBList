@@ -1,0 +1,13 @@
+.vscode
+.idea
+.DS_Store
+.npmrc
+.git
+src
+test
+node_modules
+tsconfig.json
+vite.config.js
+pnpm-lock.yaml
+npm-shrinkwrap.json
+index.html

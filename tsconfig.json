@@ -1,15 +1,30 @@
 {
   "compilerOptions": {
-    "outDir": "build",
-    "module": "umd",
-    "noImplicitAny": true,
-    "removeComments": true,
-    "preserveConstEnums": true,
-    "sourceMap": false,
-    "downlevelIteration": true,
-    "lib": ["es2015", "es2016", "dom"]
+    "outDir": "./build",
+    "rootDir": "./src",
+    "target": "ES6",
+    "declaration": true,
+    "composite": true,
+    "useDefineForClassFields": true,
+    "module": "ES6",
+    "moduleResolution": "Node",
+    "strict": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "lib": ["ES2015", "DOM"],
+    "skipLibCheck": true,
+    "noEmit": true,
+    "experimentalDecorators": true,
+    "paths": {
+      "src/*": ["./src/*"],
+      "test/*": ["./test/*"],
+      "types/*": ["./types/*"]
+    }
   },
   "include": [
-    "src"
-  ]
+    "src/**/*.ts", 
+    "src/**/*.tsx"
+  ],
+  "exclude": ["node_modules"]
 }

@@ -1,7 +1,12 @@
 # Logs
 .DS_Store
+.vscode/*
+!.vscode/extensions.json
 logs
 *.log
+yarn.lock
+pnpm-lock.yaml
+npm-shrinkwrap.json
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -82,6 +87,8 @@ typings/
 # Nuxt.js build / generate output
 .nuxt
 dist
+build
+types
 
 # Gatsby files
 .cache/

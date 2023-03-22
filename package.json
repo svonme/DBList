@@ -1,12 +1,22 @@
 {
   "name": "@fengqiaogang/dblist",
-  "version": "0.3.98",
+  "version": "0.4.0",
+  "type": "module",
   "description": "Operate on a set of regular list data",
-  "main": "build/index.min.js",
+  "main": "build/storage.js",
+  "module": "build/storage.js",
   "types": "types/index.d.ts",
+  "exports": {
+    "require": "./build/storage.cjs",
+    "import": "./build/storage.js",
+    "umd": "./build/storage.umd.cjs"
+  },
   "scripts": {
-    "dev": "tsc -w",
-    "build": "tsc && uglifyjs build/index.js --comments -o build/index.min.js"
+    "build": "vite build",
+    "postbuild": "npm run types",
+    "test": "vite",
+    "postinstall": "npm shrinkwrap",
+    "types": "tsc --declaration --noEmit false --target ESNext --emitDeclarationOnly --declarationDir ./types ./src/index"
   },
   "repository": {
     "type": "git",
@@ -16,25 +26,30 @@
     "db",
     "list"
   ],
-  "author": "svon.me@gmail.com",
+  "author": {
+    "name": "svon",
+    "email": "svon.me@gmail.com",
+    "url": "https://github.com/svonme"
+  },
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/svonme/DBList/issues"
   },
   "homepage": "https://github.com/svonme/DBList#readme",
   "dependencies": {
-    "lodash": "^4.17.15"
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.155",
-    "@types/node": "^14.0.13",
-    "uglify-js": "^3.9.4"
+    "@types/node": "^18.14.0",
+    "ts-node": "^10.9.1",
+    "tslib": "^2.5.0",
+    "typescript": "^4.9.5",
+    "vite": "^4.1.4"
   },
   "files": [
     "build/",
     "types/",
-    "tsconfig.json",
     "README.md",
+    "LICENSE",
     "package.json"
   ]
 }

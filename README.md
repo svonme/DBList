@@ -5,45 +5,16 @@
 `$ npm install @fengqiaogang/dblist`
 
 ```
-const list = [{
-  name: '张三',
-  age: 20,
-  sex: '男',
-  hobby: ['上网', '玩游戏']
-}, {
-  name: '张六',
-  age: 20,
-  sex: '男',
-  hobby: ['上网', '玩游戏']
-}, {
-  name: '李四',
-  age: 20,
-  sex: '男',
-  hobby: ['上网', '唱歌']
-}, {
-  name: '王五',
-  age: 20,
-  sex: '男',
-  hobby: ['上网', '玩游戏']
-}, {
-  name: '静静',
-  age: 18,
-  sex: '女',
-  hobby: ['游泳', '唱歌']
-}, {
-  name: '夏琪',
-  age: 19,
-  sex: '女',
-  hobby: ['游泳', '跳舞']
-}, {
-  name: '游勇',
-  age: 22,
-  sex: '男',
-  hobby: ['下棋', '玩游戏']
-}]
+const list = [
+  { name: '张三', age: 20, sex: '男',hobby: ['上网', '玩游戏'] }, 
+  { name: '张六', age: 20, sex: '男', hobby: ['上网', '玩游戏'] }, 
+  { name: '李四', age: 20, sex: '男', hobby: ['上网', '唱歌'] }, 
+  { name: '王五', age: 20, sex: '男', hobby: ['上网', '玩游戏'] }, 
+  { name: '静静', age: 18, sex: '女', hobby: ['游泳', '唱歌'] }, 
+  { name: '夏琪', age: 19, sex: '女', hobby: ['游泳', '跳舞'] }, 
+  { name: '游勇', age: 22, sex: '男', hobby: ['下棋', '玩游戏'] }
+]
 ```
-
-
 
 这样的有规则数据大家都很熟悉，假如我们要想知道数据中包含 age = 19 或者 age = 20 的数据有那些
 
@@ -62,29 +33,29 @@ db.insert(list)
 db.select({ age: 19 })
 
 [
-  { name: '张六', age: 19, sex: '男', hobby: [ '上网', '玩游戏' ] },
   { name: '夏琪', age: 19, sex: '女', hobby: [ '游泳', '跳舞' ] }
 ]
 ```
 
-匹配 id = 2 或者 age = 20 的所有数据
+匹配 age = 19 或者 age = 20 的所有数据
 ```
 db.select({ age: [19, 20] });
 
 [
-  { name: '张三', age: 20, sex: '男', hobby: [ '上网', '玩游戏' ] },
-  { name: '张六', age: 19, sex: '男', hobby: [ '上网', '玩游戏' ] },
-  { name: '李四', age: 20, sex: '男', hobby: [ '上网', '玩游戏' ] },
-  { name: '夏琪', age: 19, sex: '女', hobby: [ '游泳', '跳舞' ] }
+  { name: '张三', age: 20, sex: '男',hobby: ['上网', '玩游戏'] }, 
+  { name: '张六', age: 20, sex: '男', hobby: ['上网', '玩游戏'] }, 
+  { name: '李四', age: 20, sex: '男', hobby: ['上网', '唱歌'] }, 
+  { name: '王五', age: 20, sex: '男', hobby: ['上网', '玩游戏'] },
+  { name: '夏琪', age: 19, sex: '女', hobby: ['游泳', '跳舞'] }
 ]
 ```
 
-匹配 age = 19 并且 hobby = 玩游戏 的所有数据
+匹配 age = 18 并且 sex = 女 的所有数据
 ```
-db.select({ age: 19, hobby: '玩游戏' });
+db.select({ age: 18, sex: '女' });
 
 [
-  { name: '张六', age: 19, sex: '男', hobby: [ '上网', '玩游戏' ] }
+  { name: '静静', age: 18, sex: '女', hobby: ['游泳', '唱歌'] }
 ]
 ```
 
@@ -92,22 +63,13 @@ db.select({ age: 19, hobby: '玩游戏' });
 
 ## insert 添加
 
-添加单条数据
+添加数据
 
 ```
 const value = { id: 5, value: '重庆' }
 
-const key = db.insert(value) // 返回该条元素的唯一键值
+const key: number[] = db.insert(value) // 返回该条元素的唯一键值
 ```
-
-添加多条数据
-
-```
-const values = [{ id: 6, value: '上海' },  { id: 7, value: '天津' }]
-
-const keys: Array<string | number> = db.insert(values) // 以数组形式返回所有元素的唯一键值
-```
-
 
 ## update 修改
 
@@ -117,23 +79,74 @@ const keys: Array<string | number> = db.insert(values) // 以数组形式返回�
 const where = { name: '静静' }  // 匹配条件
 const newData = { age: 19 }     // 修改的数据
 
-db.update(where, newData)
+const count: number = db.update(where, newData); // 返回受影响的行数
 ```
 
 ## remove 删除
 
-删除 age = 21 的数据
+删除 age = 22 的数据
 
 ```
-const where =   { age: 21 }    // 匹配条件，匹配那些数据需要删除
-db.remove(where)
+const where =   { age: 22 }    // 匹配条件，匹配那些数据需要删除
+const count: number = db.remove(where); // 返回受影响的行数
 ```
 
 删除 name = 夏琪 或者 name = 游勇 的数据
 
 ```
 const where =   { name: ['夏琪', '游勇'] }
-db.remove(where)
+const count: number = db.remove(where); 
+```
+
+
+## like 模糊查询
+
+查询 name 中带 `张` 的数据
+
+```
+db.like({ name: '张' })
+
+[
+  { name: '张三', age: 20, sex: '男',hobby: ['上网', '玩游戏'] }, 
+  { name: '张六', age: 20, sex: '男', hobby: ['上网', '玩游戏'] }
+]
+```
+
+## selectOne 查询
+
+selectOne 与 select 使用上一样的，selectOne 在匹配到一条数据后则会停止匹配
+
+查询 age = 20 的第一条数据
+```
+
+db.selectOne({ age: 20 });
+{ name: '张三', age: 20, sex: '男',hobby: ['上网', '玩游戏'] }
+
+
+```
+如果我们已知需要查询的数据只会存在一条时可以设置查询条数, 尽可能减少匹配次数
+```
+const where = { id: 5 }
+
+db.select({ age: 20 }, 1)
+[
+  { name: '张三', age: 20, sex: '男',hobby: ['上网', '玩游戏'] }
+]
+```
+
+
+## siblings
+
+根据条件的匹配结果查询其兄弟元素
+
+```
+
+db.siblings({ name: '张三' }) 
+
+[
+  ...
+]
+
 ```
 
 ## flatten 处理递归数据
@@ -167,8 +180,7 @@ const list = [
 解构上面的递归结构数据
 
 ```
-const db = new DBList([], 'id', 'pid')
-const data = db.flatten(list, 'children')  // children 为数据结构中的递归字段
+const data = DBList.flatten(list, 'children')  // children 为数据结构中的递归字段
 
 [
   { id: 1, value: '北京', pid: 0 },
@@ -176,8 +188,8 @@ const data = db.flatten(list, 'children')  // children 为数据结构中的递�
   { id: 4, value: '三里屯', pid: 2 },
   { id: 3, value: '东城区', pid: 1 }
 ]
-
-pid 为自动生成的外键关系数据，详情参考下面的介绍
+id 为该条数据种的唯一值
+pid 为自动生成的外键关系数据
 
 ```
 
@@ -193,56 +205,28 @@ new DBList(list, primaryKey, foreignKey, fristForeignValue, indexName)
 |  primaryKey | 否 | 主键 , 用于标识别当前数据 | "id" |
 |  foreignKey | 否 | 外键, 用于与哪条数据进行关联 | "pid" "
 |  fristForeignValue | 否 | 第一层外键的值 | "0" |
-|  indexName | 否 | 记录每一个数据的顺序 | "dbIndex" |
 
 
 ### 测试数据
 
 ```
 [
-  {
-    "id": "100",
-    "name": "A",
-    "pid": 0
-  },
-  {
-    "id": "101",
-    "name": "B",
-    "pid": "100"
-  },
-  {
-    "id": "102",
-    "name": "C",
-    "pid": "101"
-  },
-  {
-    "id": "103",
-    "name": "D",
-    "pid": "102"
-  },
-  {
-    "id": "104",
-    "name": "E",
-    "pid": "103"
-  }
+  { "id": "100", "name": "A", "pid": 0 },
+  { "id": "101", "name": "B", "pid": "100" },
+  { "id": "102", "name": "C", "pid": "101" },
+  { "id": "103", "name": "D", "pid": "102" },
+  { "id": "104", "name": "E", "pid": "103" }
 ]
 ```
-
 
 ## children 查询子级数据
 
 查询 id = 100 的子级数据
 
 ```
-const where = { id: '100' }
-db.children(where)
-
+db.children({ id: '100' });
 [
-  {
-    "id": "101",
-    "name": "B",
-    "pid": "100"
-  }
+  { "id": "101", "name": "B", "pid": "100" }
 ]
 ```
 
@@ -251,14 +235,8 @@ db.children(where)
 查询 id = 104 的父级数据 (父级返回的是对象，非数组)
 
 ```
-const where = { id: '104' }
-db.parent(where)
-
-{
-  "id": "103",
-  "name": "D",
-  "pid": "102"
-}
+db.parent({ id: '104' });
+{ "id": "103", "name": "D", "pid": "102" }
 ```
 
 ## childrenDeep 递归查询子级数据
@@ -266,8 +244,7 @@ db.parent(where)
 该方法与 children 类似, children 只会查询一层子级数据，childrenDeep 则会进行递归查询
 
 ```
-const where = { id: '100' }
-db.childrenDeep(where)
+db.childrenDeep({ id: '100' })
 // db.childrenDeep(where, 'children') 
 // 第二个参数用于指定 children 列表的键值，默认 children
 
@@ -295,8 +272,7 @@ db.childrenDeep(where)
                   {
                     "id": "104",
                     "name": "E",
-                    "pid": "103",
-                    "children": []
+                    "pid": "103"
                   }
                 ]
               }
@@ -314,8 +290,7 @@ db.childrenDeep(where)
 该方法与 parent 类似, parent 只会查询一层父级数据，parentDeep 则会进行递归查询
 
 ```
-const where = { id: '104' }
-db.parentDeep(where)
+db.parentDeep({ id: '104' })
 
 // db.parentDeep(where, 'parent') 
 // 第二个参数用于指定 parent 列表的键值，默认 parent
@@ -325,33 +300,41 @@ db.parentDeep(where)
     "id": "104",
     "name": "E",
     "pid": "103",
-    "parent": {
-      "id": "103",
-      "name": "D",
-      "pid": "102",
-      "parent": {
-        "id": "102",
-        "name": "C",
-        "pid": "101",
-        "parent": {
-          "id": "101",
-          "name": "B",
-          "pid": "100",
-          "parent": {
-            "id": "100",
-            "name": "A",
-            "pid": 0
-          }
+    "parent": [
+      {
+        "id": "103",
+        "name": "D",
+        "pid": "102",
+        "parent": [
+            {
+              "id": "102",
+              "name": "C",
+              "pid": "101",
+              "parent": [
+                {
+                  "id": "101",
+                  "name": "B",
+                  "pid": "100",
+                  "parent": [
+                    {
+                      "id": "100",
+                      "name": "A",
+                      "pid": 0
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
         }
-      }
-    }
+    ]
   }
 ]
 ```
 
 ## clone 复制
 
-执行 clone 时会返回一个正常的 Array 数据
+执行 clone 时会将所有数据以 Array 格式返回
 
 ```
 const list = db.clone()
@@ -364,56 +347,6 @@ const list = db.clone(item => {
 	// todo
 	return item;
 });
-```
-
-## like 模糊查询
-
-查询 value 中带 `北` 的数据
-
-```
-const where = { value: '北' }
-db.link(where)
-
-[
-  { id: 1, value: '北京' }
-]
-```
-
-## selectOne 查询
-
-selectOne 与 select 使用上一样的，selectOne 在匹配到一条数据后则会停止匹配。该方法返回的为数据本身，非数组
-
-查询 id = 5 的数据
-```
-const where = { id: 5 }
-
-db.selectOne(where) 
-{ id: 5, value: '重庆' }
-```
-如果我们已知需要查询的数据只会存在一条时可以设置查询条数, 尽可能减少匹配次数
-```
-const where = { id: 5 }
-
-db.select(where, 1)
-[
-  { id: 5, value: '重庆' }
-]
-```
-
-
-## siblings
-
-根据条件的匹配结果查询其兄弟元素
-
-```
-const where = { id: 5 }
-
-db.siblings(where) 
-
-[
-  ...
-]
-
 ```
 
 ## childrenDeepFlatten
@@ -429,8 +362,3 @@ db.siblings(where)
 
 ## empty
   清空元素几节点上的数据，只保留 primaryKey & foreignKey 属性
-
-```
-const where = { xxx }
-db.empty(where)
-```
