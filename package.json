@@ -15,7 +15,6 @@
     "build": "vite build",
     "postbuild": "npm run types",
     "test": "vite",
-    "postinstall": "npm shrinkwrap",
     "types": "tsc --declaration --noEmit false --target ESNext --emitDeclarationOnly --declarationDir ./types ./src/index"
   },
   "repository": {
