@@ -4,6 +4,7 @@
 .npmrc
 .git
 src
+test
 node_modules
 tsconfig.json
 vite.config.js

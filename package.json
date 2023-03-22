@@ -1,10 +1,16 @@
 {
   "name": "@fengqiaogang/dblist",
-  "version": "1.0.1",
-  "type": "commonjs",
+  "version": "0.4.0",
+  "type": "module",
   "description": "Operate on a set of regular list data",
   "main": "build/storage.js",
+  "module": "build/storage.js",
   "types": "types/index.d.ts",
+  "exports": {
+    "require": "./build/storage.cjs",
+    "import": "./build/storage.js",
+    "umd": "./build/storage.umd.cjs"
+  },
   "scripts": {
     "build": "vite build",
     "postbuild": "npm run types",
@@ -30,12 +36,6 @@
     "url": "https://github.com/svonme/DBList/issues"
   },
   "homepage": "https://github.com/svonme/DBList#readme",
-  "exports": {
-    ".": {
-      "import": "./build/storage.js",
-      "require": "./build/storage.umd.js"
-    }
-  },
   "dependencies": {
   },
   "devDependencies": {

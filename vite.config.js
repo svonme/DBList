@@ -16,7 +16,7 @@ export default defineConfig({
     lib: {
       entry: "src/index",
       name: "storage",
-      formats: ["es", "umd"],
+      formats: ["es", "umd", "cjs"],
       fileName: "storage",
       
     },

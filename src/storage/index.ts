@@ -1,5 +1,5 @@
 
-import DB from "./db";
+import { DB, Get, Matcher, Remove } from "./db";
 
 import * as _ from "../util";
 
@@ -39,7 +39,7 @@ export default class Storage<Value = object> extends DB<Value> {
       }
       return value;
     }
-    const list = _.flatten<Value>(
+    const list = Storage.flatten<Value>(
       _.concat<Value>(row as Value[]), 
       childrenName, 
       this.primary, 
@@ -57,22 +57,31 @@ export default class Storage<Value = object> extends DB<Value> {
   remove(where: object): number {
     let index = 0;
     const list = this.where(where);
-    for (const item of list) {
+    for (let i = 0, len = list.length; i < len; i++) {
+      const item = list[i];
       const id = item.get(this.primary);
-      const status = super.Remove(id);
+      const status = super[Remove](id);
       if (status) {
         index += 1;
       }
     }
     return index;
   }
+  /**
+   * 修改数据
+   * @param where 查询条件
+   * @param newValue 新数据
+   * @param limit 指定受影响的行数
+   * @returns 
+   */
   update(where: object, newValue: Value, limit: number = 0) {
     let index = 0;
     const list = this.select(where, limit);
     const newList: Value[] = [];
-    for (const item of list) {
+    for (let i = 0, len = list.length; i < len; i++) {
+      const item = list[i];
       const id = _.get(item, this.primary);
-      const status = super.Remove(id);
+      const status = super[Remove](id);
       if (status) {
         index += 1;
         newList.push(Object.assign({}, item, newValue));
@@ -81,15 +90,16 @@ export default class Storage<Value = object> extends DB<Value> {
     this.insert(newList);
     return index;
   }
-  private [Compare] (list: Map<string | number, any>[], key: string | number, value: any) {
+  private [Compare] (list: Map<string | number, any>[], key: string | number, value: any, like?: boolean) {
     const array: Map<string | number, any>[] = [];
     for (let i = 0, len = list.length; i < len; i++) {
       const data = list[i];
       // 从查询到集合中匹配符合条件的数据
-      const matcher = this.Matcher(data);
+      const matcher = this[Matcher](data, like);
       let status = matcher(key, value);
       if (!status && Array.isArray(value)) {
-        for (const item of value) {
+        for (let index = 0, size = value.length; index < size; index++) {
+          const item = value[index];
           status = matcher(key, item);
           if (status) {
             break;
@@ -106,12 +116,15 @@ export default class Storage<Value = object> extends DB<Value> {
    * 查询数据
    * @param where 查询条件
    * @param limit 查询条数
+   * @param like  是否模糊匹配
    * @returns 返回原始数据
    */
-  where(where: object, limit: number = 0): Map<string | number, any>[] {
+  where(where: object, limit: number = 0, like?: boolean): Map<string | number, any>[] {
     let list: Map<string | number, any>[] = [];
     let keys: string[] = [];
-    for (const key of _.keys(where)) {
+    const temp = _.keys(where);
+    for (let i = 0, len = temp.length; i < len; i++) {
+      const key = temp[i];
       if (key === this.primary) {
         keys = _.concat(key, keys);
       } else {
@@ -121,16 +134,31 @@ export default class Storage<Value = object> extends DB<Value> {
     if (keys.length < 1) {
       return list;
     }
-    list = this.get(keys[0], _.get(where, keys[0]));
-    for (const key of keys.slice(1)) {
+    list = this[Get](keys[0], _.get(where, keys[0]), like);
+    const array = keys.slice(1);
+    for (let i = 0, len = array.length; i < len; i++) {
+      const key = array[i];
       if (list.length > 0) {
         const value = _.get(where, key);
-        list = this[Compare](list, key, value);
+        list = this[Compare](list, key, value, like);
       } else {
         break;
       }
     }
     return limit > 0 ? list.slice(0, limit) : list;
+  }
+  /**
+   * 模糊数据
+   * @param where 查询条件
+   * @param limit 查询条数
+   * @returns 返回泛型格式数据
+   */
+  like(where?: object, limit: number = 0) {
+    if (where) {
+      const list = this.where(where, limit, true);
+      return list.map(Object.fromEntries) as Value[];
+    }
+    return [];
   }
   /**
    * 查询数据
@@ -140,7 +168,7 @@ export default class Storage<Value = object> extends DB<Value> {
    */
   select(where?: object, limit: number = 0): Value[] {
     if (where) {
-      const list = this.where(where, limit);
+      const list = this.where(where, limit, false);
       return list.map(Object.fromEntries) as Value[];
     } else {
       return this.clone(void 0, limit);
@@ -182,6 +210,13 @@ export default class Storage<Value = object> extends DB<Value> {
     return init;
   }
   /**
+   * 将数据转换为 object 格式
+   * @returns 
+   */
+  toJSON(): object {
+    return this.clone();
+  }
+  /**
    * 根据查询条件查询第一条数据
    * @param where 查询条件
    */
@@ -201,7 +236,9 @@ export default class Storage<Value = object> extends DB<Value> {
       const id = table.get(this.foreign);
       const query = {[this.foreign]: id};
       const list: Value[] = [];
-      for (const data of this.where(query)) {
+      const array = this.where(query);
+      for (let i = 0, len = array.length; i < len; i++) {
+        const data = array[i];
         const status = _.compare(data.get(this.primary), table.get(this.primary));
         if (!status) {
           list.push(Object.fromEntries(data) as Value);
@@ -218,12 +255,14 @@ export default class Storage<Value = object> extends DB<Value> {
    */
   empty(where: object): number {
     const list = [];
-    for (const data of this.where(where)) {
+    const array = this.where(where);
+    for (let i = 0, len = array.length; i < len; i++) {
+      const data = array[i];
       list.push({
         [this.primary]: data.get(this.primary),
         [this.foreign]: data.get(this.foreign)
       });
-      super.Remove(data.get(this.primary));
+      super[Remove](data.get(this.primary));
     }
     const keys = this.insert(list);
     return keys.length;
@@ -272,7 +311,8 @@ export default class Storage<Value = object> extends DB<Value> {
       return data;
     }, result);
     const deep = (list: Value[]): Value[] => {
-      for (const item of list) {
+      for (let i = 0, len = list.length; i < len; i++) {
+        const item = list[i];
         const foreign = _.get(item, this.primary);
         const children = result[foreign];
         if (children && children.length > 0){
@@ -291,7 +331,8 @@ export default class Storage<Value = object> extends DB<Value> {
    */
   parentDeep(where?: object, parentName: string = "parent") {
     const deep = (list: Value[]): Value[] => {
-      for (const item of list) {
+      for (let i = 0, len = list.length; i < len; i++) {
+        const item = list[i];
         const query = {[this.primary]: _.get(item, this.foreign)};
         const parent = this.selectOne(query);
         if (parent) {

@@ -5,6 +5,8 @@
 logs
 *.log
 yarn.lock
+pnpm-lock.yaml
+npm-shrinkwrap.json
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

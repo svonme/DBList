@@ -2,7 +2,7 @@
 // const DB = require('../build/index.js');
 
 // import { list as Data } from './test';
-import Data from "./data.json";
+// import Data from "./data.json";
 
 
 // const db = new DB(list);
@@ -32,11 +32,19 @@ import Data from "./data.json";
 
 import Storage from "../src/storage";
 // import Storage from "../build/storage";
-// const Storage = require("../build/storage.umd.cjs");
+// const Storage = require("../build/storage.mjs");
 
 
 // console.time("db");
-const db = new Storage(Data as any[]);
+const db = new Storage([
+  { name: '张三', age: 20, sex: '男',hobby: ['上网', '玩游戏'] }, 
+  { name: '张六', age: 20, sex: '男', hobby: ['上网', '玩游戏'] }, 
+  { name: '李四', age: 20, sex: '男', hobby: ['上网', '唱歌'] }, 
+  { name: '王五', age: 20, sex: '男', hobby: ['上网', '玩游戏'] }, 
+  { name: '静静', age: 18, sex: '女', hobby: ['游泳', '唱歌'] }, 
+  { name: '夏琪', age: 19, sex: '女', hobby: ['游泳', '跳舞'] }, 
+  { name: '游勇', age: 22, sex: '男', hobby: ['下棋', '玩游戏'] }
+]);
 // console.timeEnd("db");
 console.log("size = ", db.size());
 
@@ -58,12 +66,12 @@ console.log("size = ", db.size());
 //   name: "张三"
 // });
 
-// console.log(db.select({ id: "100" }));
+// for (let index = 1; index <= 100; index++) {
+//   const key = `childrenDeep-${index}`;
+//   console.time(key);
+//   console.log(db.childrenDeep({pid: 0}));
+//   console.timeEnd(key);
+// }
 
-console.time("childrenDeep");
-Promise.resolve(db.parentDeepFlatten()).then(function(value) {
-  console.log(value);
-  console.timeEnd("childrenDeep");
-})
-
+console.log(db.siblings({ name: '张三' }) );
 
