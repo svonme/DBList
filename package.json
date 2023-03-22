@@ -1,13 +1,22 @@
 {
   "name": "@fengqiaogang/dblist",
-  "version": "1.0.1",
+  "version": "0.4.0",
   "type": "module",
   "description": "Operate on a set of regular list data",
-  "main": "build/index.min.js",
+  "main": "build/storage.js",
+  "module": "build/storage.js",
   "types": "types/index.d.ts",
+  "exports": {
+    "require": "./build/storage.cjs",
+    "import": "./build/storage.js",
+    "umd": "./build/storage.umd.cjs"
+  },
   "scripts": {
     "build": "vite build",
-    "test": "vite"
+    "postbuild": "npm run types",
+    "test": "vite",
+    "postinstall": "npm shrinkwrap",
+    "types": "tsc --declaration --noEmit false --target ESNext --emitDeclarationOnly --declarationDir ./types ./src/index"
   },
   "repository": {
     "type": "git",
@@ -28,10 +37,8 @@
   },
   "homepage": "https://github.com/svonme/DBList#readme",
   "dependencies": {
-    "lodash-es": "^4.17.21"
   },
   "devDependencies": {
-    "@types/lodash-es": "^4.17.6",
     "@types/node": "^18.14.0",
     "ts-node": "^10.9.1",
     "tslib": "^2.5.0",
@@ -41,7 +48,6 @@
   "files": [
     "build/",
     "types/",
-    "tsconfig.json",
     "README.md",
     "LICENSE",
     "package.json"

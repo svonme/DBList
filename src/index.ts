@@ -1,4 +1,3 @@
-import DB from "./db";
+import Storage from "./storage/index";
 
-export { flatten } from "./util";
-export default DB;
+export default Storage;
