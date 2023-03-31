@@ -151,7 +151,7 @@ export class DB<Value = object> {
    * @returns 
    */
   private [GetPrimary](key: string | number, value: any, like: boolean = false) {
-    const primaryList: string[] = [];
+    const primaryList: Array<string | number> = [];
     const table = this.db.get(key);
     if (table) {
       const keys = _.concat(table.keys());
@@ -159,9 +159,9 @@ export class DB<Value = object> {
         const key = keys[index];
         const item = table.get(key);
         if (like && _.compareLikeArray(item, value)) {
-          primaryList.push(String(key));
+          primaryList.push(key);
         } else if (_.compareArray(item, value)) {
-          primaryList.push(String(key));
+          primaryList.push(key);
         }
       }
     }
