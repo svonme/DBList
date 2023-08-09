@@ -3,6 +3,7 @@ import * as _ from "../util";
 export const Add = Symbol("add");
 export const Get = Symbol("Get");
 export const Remove = Symbol("Remove");
+export const Update = Symbol("Update");
 export const Matcher = Symbol("Matcher");
 export const IsMatch = Symbol("IsMatch");
 export const GetTable = Symbol("GetTable");
@@ -189,6 +190,22 @@ export class DB<Value = object> {
       table.set(primary, value);
     }
     return primary;
+  }
+  protected [Update](data: Value) {
+    const keys = _.keys(data);
+    const primary = _.get(data, this.primary);
+    for (let index = 0, size = keys.length; index < size; index++) {
+      const key = keys[index];
+      const value = _.get(data, key);
+      let table = this.db.get(key);
+      if (table) {
+        table.set(primary, value);
+      } else {
+        table = new Map<string | number, any>();
+        table.set(primary, value);
+        this.db.set(key, table);
+      }
+    }
   }
   /**
    * 添加数据

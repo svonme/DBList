@@ -12,7 +12,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "esModuleInterop": true,
-    "lib": ["ES2015", "DOM"],
+    "lib": ["esnext", "DOM"],
     "skipLibCheck": true,
     "noEmit": true,
     "experimentalDecorators": true,

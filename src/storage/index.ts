@@ -1,5 +1,5 @@
 
-import { DB, Get, Matcher, Remove } from "./db";
+import { DB, Get, Matcher, Remove, Update } from "./db";
 
 import * as _ from "../util";
 
@@ -75,20 +75,14 @@ export default class Storage<Value = object> extends DB<Value> {
    * @returns 
    */
   update(where: object, newValue: Value, limit: number = 0) {
-    let index = 0;
     const list = this.select(where, limit);
-    const newList: Value[] = [];
     for (let i = 0, len = list.length; i < len; i++) {
       const item = list[i];
-      const id = _.get(item, this.primary);
-      const status = super[Remove](id);
-      if (status) {
-        index += 1;
-        newList.push(Object.assign({}, item, newValue));
-      }
+      const value = _.omit(newValue, [this.primary, this.foreign]);
+      const temp = Object.assign({}, item, value);
+      super[Update](temp);
     }
-    this.insert(newList);
-    return index;
+    return list.length;
   }
   private [Compare] (list: Map<string | number, any>[], key: string | number, value: any, like?: boolean) {
     const array: Map<string | number, any>[] = [];
@@ -321,7 +315,14 @@ export default class Storage<Value = object> extends DB<Value> {
       }
       return list;
     }
-    return where ? deep(this.select(where)) : [];
+    if (where) {
+      return deep(this.select(where));
+    } else {
+      const query = {
+        [this.foreign]: this.foreignValue
+      };
+      return deep(this.select(query));
+    }
   }
   /**
    * 查询所有父级数据
