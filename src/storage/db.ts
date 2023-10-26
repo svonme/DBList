@@ -31,10 +31,11 @@ export class DB<Value = object> {
     foreignValue: string | number = 0,
     iteratee?: (value: T) => T
   ){
-    if (!list) {
-      throw "function flatten: list cannot be undefined"
-    }
     const data: T[] = [];
+    if (!list) {
+      console.warn("function flatten: list cannot be undefined");
+      return data;
+    }
     const array = _.concat<T>(list as any);
     for (let i = 0, size = array.length; i < size; i++) {
       const item = array[i];
