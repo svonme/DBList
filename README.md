@@ -195,9 +195,6 @@ pid 为自动生成的外键关系数据
 
 ## 构造参数
 
-```
-new DBList(list, primaryKey, foreignKey, fristForeignValue, indexName)
-```
 
 |  字段 | 是否可以为空  | 说明  | 默认值  |
 | ------------ | ------------ | ------------ | ------------ |
@@ -205,6 +202,17 @@ new DBList(list, primaryKey, foreignKey, fristForeignValue, indexName)
 |  primaryKey | 否 | 主键 , 用于标识别当前数据 | "id" |
 |  foreignKey | 否 | 外键, 用于与哪条数据进行关联 | "pid" "
 |  fristForeignValue | 否 | 第一层外键的值 | "0" |
+
+
+```
+new DBList(list, primaryKey, foreignKey, fristForeignValue)
+
+const db = new DBList(list, "id", "pid", "0");
+
+db.primaryKey => "id"
+db.foreignKey => "pid"
+db.fristForeignValue => "0"
+```
 
 
 ### 测试数据

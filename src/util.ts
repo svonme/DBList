@@ -82,7 +82,7 @@ export const includes = function(value: string | string[] | number[], target: st
         break;
       }
     }
-    if (res.length === keyworkd.length) {
+    if (res.length >= keyworkd.length) {
       status = true;
     }
   }
