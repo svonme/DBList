@@ -59,15 +59,34 @@ export const set = function<T = object>(data: T, key: string | number, value: an
 //   }
 // }
 
-export const includes = function(value: string | string[] | number[], target: string | number) {
+export const includes = function(value: string | string[] | number[], target: string | number, like: boolean = false): boolean {
+  let status: boolean = false;
   if (target && value && Array.isArray(value)) {
     // @ts-ignore
-    return value.includes(target);
+    status = value.includes(target);
+  } else if (target && value) {
+    status = String(value).includes(target as string);
   }
-  if (target && value) {
-    return String(value).includes(target as string);
+  if (like && !status) {
+    const text = (Array.isArray(value) ? JSON.stringify(value) : String(value)).trim().toLowerCase();
+    const keyworkd = String(target).toLowerCase().replace(/[\s\*]+/g, ""); // 转换为小写并且过滤空格与*号
+    const res: string[] = [];
+    let data = text.slice(0);
+    for (let index = 0, len = keyworkd.length; index < len; index++) {
+      const char = keyworkd[index];
+      const i = data.indexOf(char);
+      if (i >= 0) {
+        res.push(char);
+        data = data.slice(i + 1);
+      } else {
+        break;
+      }
+    }
+    if (res.length === keyworkd.length) {
+      status = true;
+    }
   }
-  return false;
+  return status;
 }
 
 export const omit = function<T = object, Value = T>(data: T, keyList: string[]): Value {
@@ -118,7 +137,7 @@ export const compare = function(origin: any, value: any, like: boolean = false):
   if (type === typeof value) {
     if (type === "string" || type === "number") {
       if (like) {
-        status = includes(origin, value);
+        status = includes(origin, value, true);
       } else {
         // 字符串或者数字类型时直接使用值判断
         status = origin === value;

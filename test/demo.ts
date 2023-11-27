@@ -32,18 +32,21 @@ import Data from "./org.json";
 // console.timeEnd("db");
 // console.log(db);
 
-import DB from "../src/storage";
-// import DB from "../build/storage";
+// import DB from "../src/storage";
+import DB from "../build/storage.js";
 // const Storage = require("../build/storage.js");
 
 const db = new DB([], "id");
 db.insert(Data.data.results);
 
-console.log(db.size());
-
-
 console.time("like");
-const list = db.select({ id: 155 });
+const list = db.like({ name: "Organ438" });
 console.timeEnd("like");
 console.log(list);
+console.log("数据量 = %s", db.size());
+
+// import * as util from "../src/util";
+
+// console.log(util.compare("Organization10004380", "IZation1000348", true));
+
 
