@@ -33,7 +33,6 @@ export class DB<Value = object> {
   ){
     const data: T[] = [];
     if (!list) {
-      console.warn("function flatten: list cannot be undefined");
       return data;
     }
     const array = _.concat<T>(list as any);
@@ -150,9 +149,10 @@ export class DB<Value = object> {
    * @param key   
    * @param value 
    * @param like  是否模糊匹配
+   * @param limit 限制数据条数
    * @returns 
    */
-  private [GetPrimary](key: string | number, value: any, like: boolean = false) {
+  private [GetPrimary](key: string | number, value: any, like: boolean = false, limit: number = 0) {
     const primaryList: Array<string | number> = [];
     const table = this.db.get(key);
     if (table) {
@@ -164,6 +164,9 @@ export class DB<Value = object> {
           primaryList.push(key);
         } else if (_.compareArray(item, value)) {
           primaryList.push(key);
+        }
+        if (limit > 0 && primaryList.length >= limit) {
+          break;
         }
       }
     }
@@ -243,11 +246,12 @@ export class DB<Value = object> {
    * @param key 
    * @param value 
    * @param like  是否模糊匹配
+   * @param limit 限制数据条数
    * @returns 
    */
-  protected [Get](key: string | number, value: string | number, like: boolean = false): Map<string | number, any>[] {
+  protected [Get](key: string | number, value: string | number, like: boolean = false, limit?: number): Map<string | number, any>[] {
     const list: Map<string | number, any>[] = [];
-    const primaryList = this[GetPrimary](key, value, like);
+    const primaryList = this[GetPrimary](key, value, like, limit);
     for (let i = 0, len = primaryList.length; i < len; i++) {
       const id = primaryList[i];
       const value = this[GetTable](id);

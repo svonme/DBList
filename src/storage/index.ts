@@ -74,7 +74,7 @@ export default class Storage<Value = object> extends DB<Value> {
    * @param limit 指定受影响的行数
    * @returns 
    */
-  update(where: object, newValue: Value, limit: number = 0) {
+  update(where: object, newValue: Value, limit?: number) {
     const list = this.select(where, limit);
     for (let i = 0, len = list.length; i < len; i++) {
       const item = list[i];
@@ -113,7 +113,7 @@ export default class Storage<Value = object> extends DB<Value> {
    * @param like  是否模糊匹配
    * @returns 返回原始数据
    */
-  where(where: object, limit: number = 0, like?: boolean): Map<string | number, any>[] {
+  where(where: object, limit?: number, like?: boolean): Map<string | number, any>[] {
     let list: Map<string | number, any>[] = [];
     let keys: string[] = [];
     const temp = _.keys(where);
@@ -128,7 +128,7 @@ export default class Storage<Value = object> extends DB<Value> {
     if (keys.length < 1) {
       return list;
     }
-    list = this[Get](keys[0], _.get(where, keys[0]), like);
+    list = this[Get](keys[0], _.get(where, keys[0]), like, limit);
     const array = keys.slice(1);
     for (let i = 0, len = array.length; i < len; i++) {
       const key = array[i];
@@ -139,7 +139,7 @@ export default class Storage<Value = object> extends DB<Value> {
         break;
       }
     }
-    return limit > 0 ? list.slice(0, limit) : list;
+    return list;
   }
   /**
    * 模糊数据
@@ -147,7 +147,7 @@ export default class Storage<Value = object> extends DB<Value> {
    * @param limit 查询条数
    * @returns 返回泛型格式数据
    */
-  like(where?: object, limit: number = 0) {
+  like(where?: object, limit?: number) {
     if (where) {
       const list = this.where(where, limit, true);
       return list.map(Object.fromEntries) as Value[];
@@ -160,7 +160,7 @@ export default class Storage<Value = object> extends DB<Value> {
    * @param limit 查询条数
    * @returns 返回泛型格式数据
    */
-  select(where?: object, limit: number = 0): Value[] {
+  select(where?: object, limit?: number): Value[] {
     if (where) {
       const list = this.where(where, limit, false);
       return list.map(Object.fromEntries) as Value[];
@@ -177,7 +177,8 @@ export default class Storage<Value = object> extends DB<Value> {
   clone<T = Value>(iteratee?: (value: Map<string | number, any>) => T, limit: number = 0): T[] {
     const list: Map<string | number, any>[] = this.toData();
     const result: T[] = [];
-    for (let i = 0, len = limit > 0 ? limit : list.length; i < len; i++) {
+    const size = limit > 0 ? limit : list.length;
+    for (let i = 0; i < size; i++) {
       const data = list[i];
       if (iteratee) {
         result.push(iteratee(data));
