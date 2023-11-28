@@ -1,4 +1,4 @@
-import * as _ from "../util";
+import * as _ from "./util";
 
 export const Add = Symbol("add");
 export const Get = Symbol("Get");

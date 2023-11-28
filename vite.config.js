@@ -5,7 +5,7 @@ export default defineConfig({
   resolve: {
     extensions: [".ts", ".js"],
     alias: {
-      "src/": `${path.resolve(__dirname, "src")}/`,
+      "src/": `${path.resolve(__dirname, "src")}/index`,
     },
   },
   plugins: [],
@@ -15,9 +15,9 @@ export default defineConfig({
     polyfillModulePreload: false,
     lib: {
       entry: "src/index",
-      name: "storage",
-      formats: ["es", "umd", "cjs"],
-      fileName: "storage",
+      name: "DBList",
+      formats: ["umd"],
+      fileName: "dblist",
       
     },
     sourcemap: true,

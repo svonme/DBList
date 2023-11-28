@@ -32,16 +32,13 @@ import Data from "./org.json";
 // console.timeEnd("db");
 // console.log(db);
 
-import DB from "../src/storage";
-// import DB from "../build/storage";
-// const Storage = require("../build/storage.js");
-
+import DB from "../src";
 
 const db = new DB([], "id");
 db.insert(Data.data.results);
 
 console.time("like");
-const list1 = db.like({ name: "O 100" }, 100);
+const list1 = db.like({ name: "O 100" }, 10000);
 console.timeEnd("like");
 console.log(list1);
 
