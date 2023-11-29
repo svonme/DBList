@@ -16,7 +16,7 @@ export default class Storage<Value = object> extends DB<Value> {
     list: Value[] = [],
     readonly primary: string = "id",
     readonly foreign: string = "pid",
-    readonly foreignValue: string | number = 0
+    readonly foreignValue: string | number = "-1"
   ) {
     super(primary);
     if (list.length > 0) {
