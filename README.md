@@ -199,19 +199,19 @@ pid 为自动生成的外键关系数据
 |  字段 | 是否可以为空  | 说明  | 默认值  |
 | ------------ | ------------ | ------------ | ------------ |
 |  list | 否 | 实列化时默认执行一次 insert 方法  | [] |
-|  primaryKey | 否 | 主键 , 用于标识别当前数据 | "id" |
-|  foreignKey | 否 | 外键, 用于与哪条数据进行关联 | "pid" "
-|  fristForeignValue | 否 | 第一层外键的值 | "0" |
+|  primary | 否 | 主键 , 用于标识别当前数据 | "id" |
+|  foreign | 否 | 外键, 用于与哪条数据进行关联 | "pid" "
+|  foreignValue | 否 | 第一层外键的值 | "-1" |
 
 
 ```
-new DBList(list, primaryKey, foreignKey, fristForeignValue)
+new DBList(list, primary, foreign, foreignValue)
 
 const db = new DBList(list, "id", "pid", "0");
 
-db.primaryKey => "id"
-db.foreignKey => "pid"
-db.fristForeignValue => "0"
+db.primary => "id"
+db.foreign => "pid"
+db.foreignValue => "0"
 ```
 
 
@@ -369,4 +369,4 @@ const list = db.clone(item => {
   清空所有数据
 
 ## empty
-  清空元素几节点上的数据，只保留 primaryKey & foreignKey 属性
+  清空元素几节点上的数据，只保留 primary & foreign 属性

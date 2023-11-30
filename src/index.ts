@@ -1,5 +1,5 @@
 
-import { DB, Get, Matcher, Remove, Update } from "./db";
+import { DB, Get, GetTable, Matcher, Remove, Update, DefPrimary, DefForeign, DefForeignValue, DefChildrenKey } from "./db";
 
 import * as _ from "./util";
 
@@ -14,9 +14,9 @@ export default class Storage<Value = object> extends DB<Value> {
    */
   constructor(
     list: Value[] = [],
-    readonly primary: string = "id",
-    readonly foreign: string = "pid",
-    readonly foreignValue: string | number = "-1"
+    readonly primary: string = DefPrimary,
+    readonly foreign: string = DefForeign,
+    readonly foreignValue: string | number = DefForeignValue
   ) {
     super(primary);
     if (list.length > 0) {
@@ -29,7 +29,7 @@ export default class Storage<Value = object> extends DB<Value> {
    * @param childrenName children 名称
    * @returns 返回添加数据的主键（唯一值）
    */
-  insert(row?: any, childrenName: string = "children"): Array<string | number> {
+  insert(row?: any, childrenName: string = DefChildrenKey): Array<string | number> {
     if (!row) {
       return [];
     }
@@ -294,17 +294,26 @@ export default class Storage<Value = object> extends DB<Value> {
    * @returns 
    */
   childrenDeep(where?: object, childrenName: string = "children"): Value[] {
-    const result: {[key: string]: Value[]} = {};
-    this.reduce((data: any, item: Map<string | number, any>) => {
-      const value = Object.fromEntries(item) as Value;
-      const id = item.get(this.foreign);
-      if (id in result) {
-        _.set(data, id, _.concat(result[id], value));
+    // 用于推导首层数据 foreign 值
+    let first: Value | undefined;
+
+    const result: { [key: string | number]: Value[] } = {};
+    const table = this.db.get(this.primary);
+    const keys = _.concat(table?.keys() || []);
+    for (let i = 0, len = keys.length; i < len; i++) {
+      const value = this[GetTable](keys[i]);
+      const data = Object.fromEntries(value) as Value;
+      const foreign = value.get(this.foreign)
+      if (_.hasOwnProperty(result, foreign)) {
+        result[foreign].push(data);
       } else {
-        _.set(data, id, [value]);
+        result[foreign] = [data];
       }
-      return data;
-    }, result);
+      if (!first) {
+        first = data;
+      }
+    }
+
     const deep = (list: Value[]): Value[] => {
       for (let i = 0, len = list.length; i < len; i++) {
         const item = list[i];
@@ -316,14 +325,20 @@ export default class Storage<Value = object> extends DB<Value> {
       }
       return list;
     }
+
     if (where) {
       return deep(this.select(where));
-    } else {
-      const query = {
-        [this.foreign]: this.foreignValue
-      };
-      return deep(this.select(query));
+    } else if (first) {
+      const list = this.parentDeepFlatten({ [this.primary]: _.get(first, this.primary) });
+      const data = list.length > 0 ? list[list.length - 1] : {};
+      const key = _.get(data, this.foreign);
+      let res: Value[] = [];
+      if (key || key === 0) {
+        res = deep(this.select({ [this.foreign]: key }));
+      }
+      return res;
     }
+    return [];
   }
   /**
    * 查询所有父级数据
@@ -351,7 +366,7 @@ export default class Storage<Value = object> extends DB<Value> {
    * @param childrenName 
    * @returns 
    */
-  childrenDeepFlatten(where?: object, childrenName: string = "children"): Value[] {
+  childrenDeepFlatten(where?: object, childrenName: string = DefChildrenKey): Value[] {
     const list = this.childrenDeep(where, childrenName);
     const storage = new Storage<Value>([], this.primary, this.foreign, this.foreignValue);
     storage.insert(list, childrenName);

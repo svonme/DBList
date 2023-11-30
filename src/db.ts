@@ -9,8 +9,13 @@ export const IsMatch = Symbol("IsMatch");
 export const GetTable = Symbol("GetTable");
 export const GetPrimary = Symbol("GetPrimary");
 
+export const DefForeignValue = -1;
+export const DefPrimary = "id";
+export const DefForeign = "pid";
+export const DefChildrenKey = "children";
+
 export class DB<Value = object> {
-  private db: Map<string | number, Map<string | number, any>>;
+  protected db: Map<string | number, Map<string | number, any>>;
   constructor(readonly primary: string = "id") {
     this.db = new Map<string | number, Map<string | number, any>>();
   }
@@ -25,10 +30,10 @@ export class DB<Value = object> {
    */
   static flatten<T>(
     list: T | T[], 
-    childrenKey: string = "children", 
-    primary: string = "id", 
-    foreign: string = "pid", 
-    foreignValue: string | number = 0,
+    childrenKey: string = DefChildrenKey, 
+    primary: string = DefPrimary, 
+    foreign: string = DefForeign, 
+    foreignValue: string | number = DefForeignValue,
     iteratee?: (value: T) => T
   ){
     const data: T[] = [];

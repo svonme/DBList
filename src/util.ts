@@ -8,12 +8,17 @@ export const UUid = function() {
 }
 
 export const keys = function<T = object>(value: T): string[] {
-  return Object.keys(value as object);
+  return value ? Object.keys(value as object) : [];
 }
 
 export const hasOwnProperty = function(value: any, key: string) {
   if (value && key && value.hasOwnProperty) {
     return value.hasOwnProperty(key);
+  }
+  if (value && key && typeof value === "object") {
+    if (key in value) {
+      return true;
+    }
   }
   return false;
 }
