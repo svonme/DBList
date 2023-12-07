@@ -1,0 +1,74 @@
+{
+  "status": true,
+  "scode": "200",
+  "message": "操作成功",
+  "data": {
+      "deptId": 0,
+      "name": "AAAAA",
+      "deptIcon": null,
+      "deptColor": null,
+      "haveSub": 1,
+      "subList": [
+          {
+              "deptId": 165,
+              "name": "A",
+              "deptIcon": null,
+              "deptColor": null,
+              "haveSub": 1,
+              "subList": [
+                  {
+                      "deptId": 167,
+                      "name": "A1",
+                      "deptIcon": null,
+                      "deptColor": null,
+                      "haveSub": 1,
+                      "subList": [
+                          {
+                              "deptId": 170,
+                              "name": "A1-2",
+                              "deptIcon": null,
+                              "deptColor": null,
+                              "haveSub": 0,
+                              "subList": null
+                          }
+                      ]
+                  },
+                  {
+                      "deptId": 171,
+                      "name": "A2",
+                      "deptIcon": null,
+                      "deptColor": null,
+                      "haveSub": 1,
+                      "subList": [
+                          {
+                              "deptId": 172,
+                              "name": "A2-1",
+                              "deptIcon": null,
+                              "deptColor": null,
+                              "haveSub": 0,
+                              "subList": null
+                          }
+                      ]
+                  }
+              ]
+          },
+          {
+              "deptId": 166,
+              "name": "B",
+              "deptIcon": null,
+              "deptColor": null,
+              "haveSub": 1,
+              "subList": [
+                  {
+                      "deptId": 168,
+                      "name": "B2",
+                      "deptIcon": null,
+                      "deptColor": null,
+                      "haveSub": 0,
+                      "subList": null
+                  }
+              ]
+          }
+      ]
+  }
+}

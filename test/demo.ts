@@ -6,7 +6,7 @@
 
 import Data from "./org.json";
 // import Data from "./data.json";
-
+// import Data from "./demo.json";
 
 // const db = new DB(list);
 
@@ -46,7 +46,7 @@ const db = new DB([]);
 // }, "subList");
 
 // db.insert(Data)
-db.insert(Data.data.results)
+db.insert(Data.data.results, "subList")
 
 // console.time("like");
 // const list1 = db.like({ name: "O 100" }, 10000);

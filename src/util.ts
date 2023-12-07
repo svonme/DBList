@@ -12,10 +12,10 @@ export const keys = function<T = object>(value: T): string[] {
 }
 
 export const hasOwnProperty = function(value: any, key: string) {
-  if (value && key && value.hasOwnProperty) {
+  if (value && value.hasOwnProperty) {
     return value.hasOwnProperty(key);
   }
-  if (value && key && typeof value === "object") {
+  if (value && typeof value === "object") {
     if (key in value) {
       return true;
     }

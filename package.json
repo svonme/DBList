@@ -1,6 +1,6 @@
 {
   "name": "@fengqiaogang/dblist",
-  "version": "0.4.8",
+  "version": "0.4.9",
   "type": "commonjs",
   "description": "Operate on a set of regular list data",
   "main": "build/dblist.umd.js",

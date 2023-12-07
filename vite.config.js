@@ -20,7 +20,7 @@ export default defineConfig({
       fileName: "dblist",
       
     },
-    sourcemap: true,
+    sourcemap: false,
     manifest: false,
     rollupOptions: {
       external: [

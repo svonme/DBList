@@ -303,8 +303,8 @@ export default class Storage<Value = object> extends DB<Value> {
     for (let i = 0, len = keys.length; i < len; i++) {
       const value = this[GetTable](keys[i]);
       const data = Object.fromEntries(value) as Value;
-      const foreign = value.get(this.foreign)
-      if (_.hasOwnProperty(result, foreign)) {
+      const foreign = value.get(this.foreign);
+      if (_.get(result, foreign)) {
         result[foreign].push(data);
       } else {
         result[foreign] = [data];
@@ -313,7 +313,6 @@ export default class Storage<Value = object> extends DB<Value> {
         first = data;
       }
     }
-
     const deep = (list: Value[]): Value[] => {
       for (let i = 0, len = list.length; i < len; i++) {
         const item = list[i];
