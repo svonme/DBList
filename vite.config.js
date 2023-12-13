@@ -12,23 +12,13 @@ export default defineConfig({
   build: {
     outDir: "./build",
     target: "modules",
-    polyfillModulePreload: false,
     lib: {
       entry: "src/index",
       name: "DBList",
       formats: ["cjs", "es", "umd"],
       fileName: "dblist",
-      
     },
     sourcemap: false,
     manifest: false,
-    rollupOptions: {
-      external: [
-      ],
-      output: {
-        exports: "default",
-        inlineDynamicImports: true
-      }
-    }
   },
 })
