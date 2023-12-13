@@ -16,7 +16,7 @@ export default defineConfig({
     lib: {
       entry: "src/index",
       name: "DBList",
-      formats: ["umd"],
+      formats: ["cjs", "es", "umd"],
       fileName: "dblist",
       
     },

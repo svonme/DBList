@@ -1,10 +1,19 @@
 {
   "name": "@fengqiaogang/dblist",
-  "version": "0.4.9",
+  "version": "0.4.9-1",
   "type": "commonjs",
   "description": "Operate on a set of regular list data",
-  "main": "build/dblist.umd.js",
-  "types": "types/index.d.ts",
+  "main": "./build/dblist.umd.js",
+  "module": "./build/dblist.mjs",
+  "types": "./types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "import": "./build/dblist.mjs",
+      "require": "./build/dblist.umd.js",
+      "default": "./build/dblist.js"
+    }
+  },
   "scripts": {
     "build": "vite build",
     "postbuild": "npm run types",
